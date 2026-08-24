@@ -690,31 +690,39 @@ button,input,textarea{font:inherit}
   }
   function showAuthError(msg){ const el=$("authError"); el.textContent=msg; el.style.display="block"; el.classList.add("show"); el.style.whiteSpace="pre-line"; }
   function setAuthLoading(v){ const el=$("authLoading"); if(el) el.classList.toggle("show",v); const a=$("signupBtn"), b=$("loginBtn"); if(a) a.disabled=v; if(b) b.disabled=v; }
+  function countTasksInData(d){ let c=0; try{ ["daily","weekly","monthly"].forEach(l=>{ Object.values((d&&d.data&&d.data[l])||{}).forEach(b=>{ SUBJECTS.forEach(s=>{ c+=(b&&b[s]&&b[s].length)||0; }); if(b&&b.remark) c+=1; }); }); }catch(e){} return c; }
   function setupFirestoreSync(){
     if(!fbUser||!fbDb) return;
     fbUnsubs.forEach(u=>{ try{u()}catch(e){} }); fbUnsubs=[];
     const userDoc=fbDb.collection("users").doc(fbUser.uid);
-    // push current local data once (merge) so new device gets existing data
-    // don't overwrite cloud if cloud exists — snapshot handles pull
     const unsub=userDoc.onSnapshot(doc=>{
-      if(doc.exists){
-        const data=doc.data();
-        if(data.plannerState){
-          try{
-            const parsed=JSON.parse(data.plannerState);
-            // ponytail: only merge if cloud is newer than local to avoid ping-pong
-            state.data=normalizeData(parsed);
-            if(parsed.ui){
-              if(parsed.ui.selectedDate) state.selectedDate=clampDateKey(parsed.ui.selectedDate);
-              if(typeof parsed.ui.selectedWeek==="number") state.selectedWeek=parsed.ui.selectedWeek;
-              if(parsed.ui.selectedMonth) state.selectedMonth=parsed.ui.selectedMonth;
-            }
-            if(data.selfTasks) state.selfImprovementTasks=data.selfTasks;
-            render(); if(typeof renderSelfPlanner==="function" && $("selfPlanner").style.display!=="none") renderSelfPlanner();
-          }catch(e){ console.warn("Firestore parse failed",e); }
-        }
+      if(!doc.exists){
+        // ponytail: first signup — push local data to cloud so empty doc doesn't wipe local on next load
+        pushToFirestore();
+        return;
       }
-    });
+      const data=doc.data();
+      if(!data.plannerState) return; // empty doc, keep local
+      try{
+        const parsed=JSON.parse(data.plannerState);
+        const cloudCount=countTasksInData(parsed);
+        const localCount=countTasksInData({data:state.data});
+        // ponytail: if cloud is empty but local has data (import case), don't wipe local — push local instead
+        if(cloudCount===0 && localCount>0){ pushToFirestore(); return; }
+        // ponytail: if cloud has data, merge it
+        state.data=normalizeData(parsed);
+        if(parsed.ui){
+          if(parsed.ui.selectedDate) state.selectedDate=clampDateKey(parsed.ui.selectedDate);
+          if(typeof parsed.ui.selectedWeek==="number") state.selectedWeek=parsed.ui.selectedWeek;
+          if(parsed.ui.selectedMonth) state.selectedMonth=parsed.ui.selectedMonth;
+        }
+        if(Array.isArray(data.selfTasks) && data.selfTasks.length) state.selfImprovementTasks=data.selfTasks;
+        // also persist merged cloud data locally so refresh without network keeps it
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+        if(Array.isArray(data.selfTasks)) localStorage.setItem("selfImprovementTasks", JSON.stringify(data.selfTasks));
+        render(); if(typeof renderSelfPlanner==="function" && $("selfPlanner").style.display!=="none") renderSelfPlanner();
+      }catch(e){ console.warn("Firestore parse failed",e); }
+    }, err=>{ console.warn("Firestore sync error",err); });
     fbUnsubs.push(unsub);
   }
   // wraps local saves to also push to Firestore when signed in
@@ -1242,26 +1250,39 @@ button,input,textarea{font:inherit}
 
   function importFile(file){
     const reader=new FileReader();
-    reader.onload=()=>{
+    reader.onload=async ()=>{
       try{
         const parsed=JSON.parse(reader.result);
-        
+        let plannerToPush=null, selfToPush=null;
         // Handle new format (with plannerData and selfImprovementData)
         if(parsed.version === 1 && parsed.plannerData){
           if(parsed.plannerData) localStorage.setItem(STORAGE_KEY,JSON.stringify(parsed.plannerData));
           if(parsed.selfImprovementData) localStorage.setItem("selfImprovementTasks",JSON.stringify(parsed.selfImprovementData));
-          showToast("Data imported (planner + self-improvement)");
-          location.reload();
+          plannerToPush=parsed.plannerData; selfToPush=parsed.selfImprovementData||[];
         }
         // Handle old format (just planner data)
         else if(!parsed.version && parsed.data){
           localStorage.setItem(STORAGE_KEY,JSON.stringify(parsed));
-          showToast("Data imported");
-          location.reload();
+          plannerToPush=parsed; selfToPush=[];
         }
         else{
           throw new Error("bad format");
         }
+        // ponytail: if signed in, push imported data to Firestore immediately — otherwise cloud empty will wipe it on reload
+        if(fbUser && fbDb && plannerToPush){
+          try{
+            await fbDb.collection("users").doc(fbUser.uid).set({
+              plannerState: JSON.stringify(plannerToPush),
+              selfTasks: selfToPush,
+              email: fbUser.email,
+              lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            }, {merge:true});
+            showToast("Data imported & synced to cloud");
+          }catch(e){ console.warn("Firestore import push failed",e); showToast("Data imported locally (cloud sync failed)"); }
+        } else {
+          showToast("Data imported (planner + self-improvement)");
+        }
+        setTimeout(()=>location.reload(), 700);
       }catch(e){ 
         console.error("Import error:", e);
         showToast("Invalid backup file"); 
