@@ -553,6 +553,8 @@ button,input,textarea{font:inherit}
   </div>
 </div>
 
+<!-- Optional external config (gitignored) — if present overrides hardcoded FIREBASE_CONFIG -->
+<script src="firebase-config.js" onerror="console.log('firebase-config.js not found, using inline config')"></script>
 <!-- Firebase compat SDK — ponytail: compat keeps firebase.* namespace so snippet works without bundler -->
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
@@ -587,7 +589,9 @@ button,input,textarea{font:inherit}
   const $ = id => document.getElementById(id);
 
   // ============ Firebase Auth + Sync (ponytail: minimal compat layer, localStorage fallback) ============
-  const FIREBASE_CONFIG = {
+  // ponytail: load external config if you provide firebase-config.js (gitignored) — keeps keys out of public repo
+  // Create file firebase-config.js next to this HTML with: window.__FIREBASE_CONFIG__ = {apiKey:"...",...};
+  const FIREBASE_CONFIG = window.__FIREBASE_CONFIG__ || {
     apiKey: "AIzaSyDuWLcDxQTFdEftIJZ8jRj2ts9DuMd9g_w",
     authDomain: "planner-e0497.firebaseapp.com",
     projectId: "planner-e0497",
@@ -665,7 +669,7 @@ button,input,textarea{font:inherit}
     if(!hasFirebaseConfig()) return showAuthError("Firebase not configured — paste your config first");
     setAuthLoading(true);
     try{ await fbAuth.createUserWithEmailAndPassword(email,pw); showToast("Account created"); }
-    catch(e){ showAuthError(e.message); } finally{ setAuthLoading(false); }
+    catch(e){ console.error(e); showAuthError(formatAuthError(e)); } finally{ setAuthLoading(false); }
   }
   async function handleLogin(){
     const email=$("loginEmail").value.trim(), pw=$("loginPassword").value;
@@ -674,9 +678,17 @@ button,input,textarea{font:inherit}
     if(!hasFirebaseConfig()) return showAuthError("Firebase not configured — paste your config first");
     setAuthLoading(true);
     try{ await fbAuth.signInWithEmailAndPassword(email,pw); showToast("Signed in"); }
-    catch(e){ showAuthError(e.message); } finally{ setAuthLoading(false); }
+    catch(e){ console.error(e); showAuthError(formatAuthError(e)); } finally{ setAuthLoading(false); }
   }
-  function showAuthError(msg){ const el=$("authError"); el.textContent=msg; el.style.display="block"; el.classList.add("show"); }
+  function formatAuthError(e){
+    const code = e?.code || "";
+    if(code==="auth/configuration-not-found" || (e?.message||"").includes("configuration-not-found")){
+      return "Firebase Auth not configured. Fix in Firebase Console:\n1) Authentication → Sign-in method → Enable Email/Password\n2) Project Settings → General → check authDomain matches FIREBASE_CONFIG\n3) Authentication → Settings → Authorized domains → add YOUR_GITHUB_USERNAME.github.io\n4) Google Cloud Console → APIs → enable Identity Toolkit API\nThen refresh. See console for details.";
+    }
+    if(code==="auth/unauthorized-domain") return "Domain not authorized. Add "+location.hostname+" to Firebase Console → Authentication → Settings → Authorized domains.";
+    return e?.message || String(e);
+  }
+  function showAuthError(msg){ const el=$("authError"); el.textContent=msg; el.style.display="block"; el.classList.add("show"); el.style.whiteSpace="pre-line"; }
   function setAuthLoading(v){ const el=$("authLoading"); if(el) el.classList.toggle("show",v); const a=$("signupBtn"), b=$("loginBtn"); if(a) a.disabled=v; if(b) b.disabled=v; }
   function setupFirestoreSync(){
     if(!fbUser||!fbDb) return;
