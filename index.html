@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Planner</title>
+<title>94 Days Hard — JEE Planner</title>
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="data:,">
 <style>
@@ -12,7 +12,7 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#192030;color:#e8e8e8}
 body{overflow:hidden}
-button,input{font:inherit}
+button,input,textarea{font:inherit}
 
 .workspace{
   max-width:1380px;margin:24px 32px 24px 128px;height:calc(100vh - 48px);
@@ -97,17 +97,37 @@ button,input{font:inherit}
 .password-btn.cancel{background:transparent;color:#9a9aaa;border-color:rgba(255,255,255,.1)}
 .password-btn.cancel:hover{background:rgba(255,255,255,.05);color:#fff}
 
+/* Firebase Auth — reuses password-modal shell */
+.auth-btn{padding:7px 14px;border-radius:999px;border:1px solid rgba(96,165,250,.4);background:rgba(96,165,250,.15);color:#93c5fd;font-size:.78rem;font-weight:700;cursor:pointer;transition:.2s;white-space:nowrap}
+.auth-btn:hover{background:rgba(96,165,250,.25);color:#fff}
+.auth-btn.signed-in{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.4);color:#6ee7b7}
+.auth-badge{font-size:.7rem;color:#6ee7b7;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.auth-error{margin-top:10px;padding:8px 10px;border-radius:8px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:#fca5a5;font-size:.78rem;display:none}
+.auth-error.show{display:block}
+.auth-loading{font-size:.78rem;color:#93c5fd;margin-top:10px;display:none;text-align:center}
+.auth-loading.show{display:block}
+.auth-toggle{margin-top:12px;text-align:center;font-size:.78rem;color:#9a9aaa}
+.auth-toggle button{background:none;border:none;color:#60a5fa;cursor:pointer;font-weight:700;text-decoration:underline}
+.auth-toggle button:hover{color:#93c5fd}
+.auth-close{position:absolute;top:10px;right:12px;background:none;border:none;color:#9a9aaa;font-size:1.3rem;cursor:pointer}
+.auth-close:hover{color:#fff}
+
 /* Self-Planner */
 .self-planner{
   padding:24px;height:100%;display:flex;flex-direction:column;overflow:hidden
 }
 .self-planner-header{
   display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;
-  border-bottom:2px solid rgba(255,255,255,.08);padding-bottom:16px
+  border-bottom:2px solid rgba(255,255,255,.08);padding-bottom:16px;gap:12px;flex-wrap:wrap
 }
 .self-planner-title{
   font-family:Manrope,sans-serif;font-size:2rem;font-weight:800;color:#fff;letter-spacing:-.5px
 }
+.self-planner-controls{display:flex;align-items:center;gap:10px}
+.reorder-toggle{display:flex;align-items:center;gap:6px;font-size:.82rem;color:#9a9aaa;cursor:pointer;user-select:none;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);transition:.2s}
+.reorder-toggle:hover{color:#fff}
+.reorder-toggle.active{color:#fff;background:rgba(96,165,250,.15);border-color:rgba(96,165,250,.3)}
+.reorder-toggle input{accent-color:#60a5fa;width:14px;height:14px;cursor:pointer}
 .self-planner-exit{
   background:rgba(255,255,255,.08);border:none;padding:10px 16px;border-radius:8px;
   color:#9a9aaa;font-weight:600;cursor:pointer;font-size:.9rem;transition:.2s
@@ -119,14 +139,19 @@ button,input{font:inherit}
 .self-planner-content::-webkit-scrollbar{width:6px}
 .self-planner-content::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:10px}
 .self-task-item{
-  display:flex;align-items:center;gap:14px;padding:14px 12px;margin-bottom:10px;
-  border-radius:10px;background:rgba(255,255,255,.03);transition:.2s;group:hover{background:rgba(255,255,255,.06)}
+  display:flex;align-items:flex-start;gap:10px;padding:14px 12px;margin-bottom:10px;
+  border-radius:10px;background:rgba(255,255,255,.03);transition:.2s
 }
 .self-task-item:hover{background:rgba(255,255,255,.06)}
+.self-task-item.dragging{opacity:.4}
+.self-task-item.drag-over{outline:1px dashed rgba(96,165,250,.6);background:rgba(96,165,250,.08)}
+.drag-handle{flex:0 0 18px;width:18px;display:none;align-items:center;justify-content:center;color:#6b7280;cursor:grab;padding-top:6px}
+.reorder-enabled .drag-handle{display:flex}
+.drag-handle:active{cursor:grabbing}
 .self-task-checkbox{
   flex:0 0 20px;width:20px;height:20px;border:2px solid rgba(96,165,250,.5);
   border-radius:6px;cursor:pointer;background:transparent;transition:.2s;
-  display:flex;align-items:center;justify-content:center
+  display:flex;align-items:center;justify-content:center;margin-top:4px
 }
 .self-task-checkbox input{display:none}
 .self-task-checkbox input:checked + svg{opacity:1;color:#60a5fa}
@@ -135,7 +160,7 @@ button,input{font:inherit}
 }
 .self-task-input{
   flex:1;background:transparent;border:none;color:#e8e8e8;font-size:1.15rem;font-weight:500;
-  outline:none;font-family:Inter,sans-serif;padding:0
+  outline:none;font-family:Inter,sans-serif;padding:2px 0;resize:none;overflow:hidden;min-height:24px;line-height:1.45;word-break:break-word;overflow-wrap:break-word;white-space:pre-wrap
 }
 .self-task-input::placeholder{color:rgba(158,158,170,.5)}
 .self-task-item.completed .self-task-input{
@@ -143,11 +168,15 @@ button,input{font:inherit}
 }
 .self-task-delete{
   background:none;border:none;color:#ef4444;cursor:pointer;opacity:0;transition:.2s;
-  padding:4px;display:flex;align-items:center;justify-content:center
+  padding:4px;display:flex;align-items:center;justify-content:center;margin-top:2px
 }
 .self-task-item:hover .self-task-delete{opacity:1}
 .self-task-delete:hover{opacity:1;transform:scale(1.2)}
 .self-task-delete svg{width:16px;height:16px;stroke-width:2}
+.undo-popup{position:fixed;left:50%;bottom:24px;transform:translate(-50%,80px);opacity:0;background:#23252c;border:1px solid rgba(255,255,255,.14);padding:10px 14px;border-radius:10px;color:#e8e8e8;font-size:.85rem;display:flex;align-items:center;gap:12px;transition:.25s;z-index:300;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.undo-popup.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
+.undo-popup button{background:#60a5fa;border:none;color:#fff;padding:6px 12px;border-radius:6px;font-weight:600;cursor:pointer;font-size:.8rem}
+.undo-popup button:hover{background:#3b82f6}
 
 .subject-chemistry{--acc:#60a5fa;--acc-soft:#93c5fd;--acc-bg:rgba(96,165,250,.04);--acc-bd:rgba(96,165,250,.55);--acc-chk:#3b82f6}
 .subject-maths{--acc:#facc15;--acc-soft:#fcd866;--acc-bg:rgba(250,204,21,.04);--acc-bd:rgba(250,204,21,.55);--acc-chk:#d97706}
@@ -277,7 +306,10 @@ button,input{font:inherit}
 .card-pct small{font-size:.62rem;color:#8a8a9e;font-weight:600}
 .progress-line{height:4px;background:#33343e;border-radius:99px;margin-top:12px;overflow:hidden}
 .progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#7c5cff,#5b8cff)}
-.card-body{flex:1;display:flex;flex-direction:column;gap:13px;padding:13px 15px 15px}
+.card-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:13px;padding:13px 15px 15px;overflow-y:auto}
+.card-body::-webkit-scrollbar{width:7px}
+.card-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:99px}
+.card-body::-webkit-scrollbar-track{background:transparent}
 .mini-subject{flex:1;display:flex;align-items:stretch;gap:10px;min-width:0}
 .mini-rail{flex:0 0 24px;position:relative;cursor:pointer;border-radius:8px}
 .mini-rail::after{
@@ -313,7 +345,6 @@ button,input{font:inherit}
 .mini-del{opacity:0;border:0;background:transparent;color:#ef4444;cursor:pointer;font-size:.95rem;line-height:1}
 .mini-task:hover .mini-del{opacity:1}
 .no-plan{font-size:.74rem;color:#7c7c8e;padding:2px 0;font-style:italic}
-.mini-more{font-size:.66rem;color:var(--acc-soft,#8a8a9e);font-weight:600;margin-top:3px}
 .card-log{
   display:flex;align-items:center;gap:10px;padding:8px 13px;
   border-top:1px solid rgba(255,255,255,.06);background:rgba(10,16,32,.35)
@@ -446,6 +477,8 @@ button,input{font:inherit}
     <div class="header-right">
       <div class="stats stats-right"><span class="count" id="totalCount">0</span> total</div>
       <span class="view-context" id="viewContext"></span>
+      <button class="auth-btn" id="authBtn">Sign Up</button>
+      <span class="auth-badge" id="authBadge" hidden></span>
       <button class="view-toggle-btn" id="viewToggleBtn" aria-label="Toggle view mode"><i data-lucide="notebook-text"></i></button>
     </div>
   </div>
@@ -456,11 +489,41 @@ button,input{font:inherit}
   <div class="self-planner" id="selfPlanner" style="display:none;">
     <div class="self-planner-header">
       <h1 class="self-planner-title">Self Improvement</h1>
-      <button class="self-planner-exit" id="selfPlannerExit">Exit</button>
+      <div class="self-planner-controls">
+        <label class="reorder-toggle" id="reorderToggleLabel"><input type="checkbox" id="reorderToggle"> Reorder</label>
+        <button class="self-planner-exit" id="selfPlannerExit">Exit</button>
+      </div>
     </div>
     <div class="self-planner-content" id="selfPlannerContent"></div>
   </div>
 
+</div>
+
+<!-- Firebase Auth Modal (Sign Up / Sign In) -->
+<div class="password-modal" id="authModal">
+  <div class="password-modal-content" style="position:relative">
+    <button class="auth-close" id="authClose" aria-label="Close">×</button>
+    <div class="password-modal-title" id="authTitle">Sign Up</div>
+    <div class="password-modal-subtitle" id="authSubtitle">Create an account to sync across devices</div>
+    <!-- Signup form -->
+    <div id="signupForm">
+      <input type="email" class="password-input" id="signupEmail" placeholder="Email" autocomplete="email">
+      <input type="password" class="password-input" id="signupPassword" placeholder="Password (min 6 chars)" autocomplete="new-password">
+      <input type="password" class="password-input" id="signupConfirm" placeholder="Confirm password" autocomplete="new-password">
+      <button class="password-btn submit" id="signupBtn" style="width:100%">Create Account</button>
+      <div class="auth-toggle">Already have an account? <button id="toggleToLogin">Sign In</button></div>
+    </div>
+    <!-- Login form -->
+    <div id="loginForm" style="display:none">
+      <input type="email" class="password-input" id="loginEmail" placeholder="Email" autocomplete="email">
+      <input type="password" class="password-input" id="loginPassword" placeholder="Password" autocomplete="current-password">
+      <button class="password-btn submit" id="loginBtn" style="width:100%">Sign In</button>
+      <div class="auth-toggle">Need an account? <button id="toggleToSignup">Sign Up</button></div>
+    </div>
+    <div class="auth-error" id="authError"></div>
+    <div class="auth-loading" id="authLoading">Please wait…</div>
+    <button class="password-btn cancel" id="authLogout" style="width:100%;margin-top:10px;display:none">Sign Out</button>
+  </div>
 </div>
 
 <!-- Password Modal -->
@@ -476,6 +539,7 @@ button,input{font:inherit}
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<div class="undo-popup" id="undoPopup"><span id="undoMsg">Task deleted</span><button id="undoBtn">Undo</button></div>
 <input type="file" id="importFileInput" accept=".json,application/json" style="display:none">
 <div class="modal-overlay" id="confirmModal" hidden>
   <div class="modal-card">
@@ -489,6 +553,10 @@ button,input{font:inherit}
   </div>
 </div>
 
+<!-- Firebase compat SDK — ponytail: compat keeps firebase.* namespace so snippet works without bundler -->
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
 <script>
 (() => {
@@ -517,6 +585,139 @@ button,input{font:inherit}
   };
 
   const $ = id => document.getElementById(id);
+
+  // ============ Firebase Auth + Sync (ponytail: minimal compat layer, localStorage fallback) ============
+  const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyDuWLcDxQTFdEftIJZ8jRj2ts9DuMd9g_w",
+    authDomain: "planner-e0497.firebaseapp.com",
+    projectId: "planner-e0497",
+    storageBucket: "planner-e0497.firebasestorage.app",
+    messagingSenderId: "466606111954",
+    appId: "1:466606111954:web:592094d2e4844c645ac10b"
+  };
+  let fbAuth=null, fbDb=null, fbUser=null, fbUnsubs=[];
+  function hasFirebaseConfig(){ return FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes("YOUR_"); }
+  function initFirebase(){
+    if(!hasFirebaseConfig()) return;
+    try{
+      if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+      fbAuth=firebase.auth(); fbDb=firebase.firestore();
+      fbAuth.onAuthStateChanged(user=>{
+        fbUser=user;
+        updateAuthUI();
+        if(user){
+          $("authModal").classList.remove("show");
+          setupFirestoreSync();
+        } else {
+          fbUnsubs.forEach(u=>{ try{u()}catch(e){} }); fbUnsubs=[];
+        }
+      });
+    }catch(e){ console.warn("Firebase init failed — check config",e); }
+  }
+  function updateAuthUI(){
+    const btn=$("authBtn"), badge=$("authBadge"), logout=$("authLogout");
+    if(!btn) return;
+    if(fbUser){
+      btn.textContent="Account"; btn.classList.add("signed-in"); btn.title=fbUser.email;
+      if(badge){ badge.textContent=fbUser.email; badge.hidden=false; }
+      if(logout) logout.style.display="block";
+    } else if(hasFirebaseConfig()){
+      btn.textContent="Sign Up"; btn.classList.remove("signed-in"); btn.title="Sign up / Sign in";
+      if(badge) badge.hidden=true;
+      if(logout) logout.style.display="none";
+    } else {
+      btn.textContent="Sign Up"; btn.title="Add Firebase config to enable";
+      if(logout) logout.style.display="none";
+    }
+  }
+  function setupAuthUI(){
+    const modal=$("authModal");
+    $("authBtn")?.addEventListener("click",()=>{
+      if(fbUser){ modal.classList.add("show"); } // show account + logout
+      else if(!hasFirebaseConfig()){ showToast("Add Firebase config first — see NEXT STEPS in console"); console.log("NEXT STEPS: paste your Firebase config into FIREBASE_CONFIG at top of <script> (search FIREBASE_CONFIG)"); modal.classList.add("show"); }
+      else modal.classList.add("show");
+    });
+    $("authClose")?.addEventListener("click",()=>modal.classList.remove("show"));
+    modal?.addEventListener("click",e=>{ if(e.target===modal) modal.classList.remove("show"); });
+    $("toggleToLogin")?.addEventListener("click",()=>{
+      $("signupForm").style.display="none"; $("loginForm").style.display="block";
+      $("authTitle").textContent="Sign In"; $("authSubtitle").textContent="Access your planner from anywhere";
+      $("authError").classList.remove("show"); $("authError").style.display="none";
+    });
+    $("toggleToSignup")?.addEventListener("click",()=>{
+      $("loginForm").style.display="none"; $("signupForm").style.display="block";
+      $("authTitle").textContent="Sign Up"; $("authSubtitle").textContent="Create an account to sync across devices";
+      $("authError").classList.remove("show"); $("authError").style.display="none";
+    });
+    $("signupBtn")?.addEventListener("click", handleSignup);
+    $("signupConfirm")?.addEventListener("keydown",e=>{ if(e.key==="Enter") handleSignup(); });
+    $("signupPassword")?.addEventListener("keydown",e=>{ if(e.key==="Enter") handleSignup(); });
+    $("loginBtn")?.addEventListener("click", handleLogin);
+    $("loginPassword")?.addEventListener("keydown",e=>{ if(e.key==="Enter") handleLogin(); });
+    $("authLogout")?.addEventListener("click", async()=>{ try{ await fbAuth.signOut(); $("authModal").classList.remove("show"); showToast("Signed out"); }catch(e){ showAuthError(e.message); } });
+  }
+  async function handleSignup(){
+    const email=$("signupEmail").value.trim(), pw=$("signupPassword").value, confirm=$("signupConfirm").value;
+    const errEl=$("authError"); errEl.style.display="none"; errEl.classList.remove("show");
+    if(!email||!pw||!confirm) return showAuthError("Please fill in all fields");
+    if(pw.length<6) return showAuthError("Password must be at least 6 characters");
+    if(pw!==confirm) return showAuthError("Passwords don't match");
+    if(!hasFirebaseConfig()) return showAuthError("Firebase not configured — paste your config first");
+    setAuthLoading(true);
+    try{ await fbAuth.createUserWithEmailAndPassword(email,pw); showToast("Account created"); }
+    catch(e){ showAuthError(e.message); } finally{ setAuthLoading(false); }
+  }
+  async function handleLogin(){
+    const email=$("loginEmail").value.trim(), pw=$("loginPassword").value;
+    const errEl=$("authError"); errEl.style.display="none"; errEl.classList.remove("show");
+    if(!email||!pw) return showAuthError("Please enter email and password");
+    if(!hasFirebaseConfig()) return showAuthError("Firebase not configured — paste your config first");
+    setAuthLoading(true);
+    try{ await fbAuth.signInWithEmailAndPassword(email,pw); showToast("Signed in"); }
+    catch(e){ showAuthError(e.message); } finally{ setAuthLoading(false); }
+  }
+  function showAuthError(msg){ const el=$("authError"); el.textContent=msg; el.style.display="block"; el.classList.add("show"); }
+  function setAuthLoading(v){ const el=$("authLoading"); if(el) el.classList.toggle("show",v); const a=$("signupBtn"), b=$("loginBtn"); if(a) a.disabled=v; if(b) b.disabled=v; }
+  function setupFirestoreSync(){
+    if(!fbUser||!fbDb) return;
+    fbUnsubs.forEach(u=>{ try{u()}catch(e){} }); fbUnsubs=[];
+    const userDoc=fbDb.collection("users").doc(fbUser.uid);
+    // push current local data once (merge) so new device gets existing data
+    // don't overwrite cloud if cloud exists — snapshot handles pull
+    const unsub=userDoc.onSnapshot(doc=>{
+      if(doc.exists){
+        const data=doc.data();
+        if(data.plannerState){
+          try{
+            const parsed=JSON.parse(data.plannerState);
+            // ponytail: only merge if cloud is newer than local to avoid ping-pong
+            state.data=normalizeData(parsed);
+            if(parsed.ui){
+              if(parsed.ui.selectedDate) state.selectedDate=clampDateKey(parsed.ui.selectedDate);
+              if(typeof parsed.ui.selectedWeek==="number") state.selectedWeek=parsed.ui.selectedWeek;
+              if(parsed.ui.selectedMonth) state.selectedMonth=parsed.ui.selectedMonth;
+            }
+            if(data.selfTasks) state.selfImprovementTasks=data.selfTasks;
+            render(); if(typeof renderSelfPlanner==="function" && $("selfPlanner").style.display!=="none") renderSelfPlanner();
+          }catch(e){ console.warn("Firestore parse failed",e); }
+        }
+      }
+    });
+    fbUnsubs.push(unsub);
+  }
+  // wraps local saves to also push to Firestore when signed in
+  function pushToFirestore(){
+    if(!fbUser||!fbDb) return;
+    try{
+      const payload={
+        plannerState: JSON.stringify({ version:1, startDate:START_DATE, endDate:END_DATE, data:state.data, ui:{ activeTab:state.activeTab, views:state.views, selectedDate:state.selectedDate, selectedWeek:state.selectedWeek, selectedMonth:state.selectedMonth, calendarCursor:state.calendarCursor?dateKey(state.calendarCursor):null } }),
+        selfTasks: state.selfImprovementTasks,
+        email: fbUser.email,
+        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      fbDb.collection("users").doc(fbUser.uid).set(payload,{merge:true}).catch(e=>console.warn("Firestore push failed",e));
+    }catch(e){ console.warn(e); }
+  }
 
   function dateKey(d) {
     return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
@@ -607,6 +808,7 @@ button,input{font:inherit}
         calendarCursor:state.calendarCursor?dateKey(state.calendarCursor):null
       }
     }));
+    pushToFirestore();
   }
 
   function ensureToday(){
@@ -871,10 +1073,8 @@ button,input{font:inherit}
     const logSubject=state.gridLog[logId]||"";
     const rows=SUBJECTS.map(s=>{
       const tasks=state.data[level][key]?.[s]||[];
-      const visible=tasks.slice(0,3);
-      const more=tasks.length-visible.length;
       const logging=logSubject===s;
-      const lis=visible.map(t=>`<div class="mini-task ${t.completed?"done":""}" data-level="${level}" data-key="${key}" data-subject="${s}" data-id="${t.id}">
+      const lis=tasks.map(t=>`<div class="mini-task ${t.completed?"done":""}" data-level="${level}" data-key="${key}" data-subject="${s}" data-id="${t.id}">
         <span class="mini-check ${t.completed?"checked":""}" data-action="mtoggle" role="checkbox" aria-checked="${t.completed}"></span>
         <span class="mini-text" data-action="medit" title="Double-click to edit">${escapeHtml(t.text)}</span>
         <button class="mini-del" data-action="mdelete" aria-label="Delete task">×</button>
@@ -884,8 +1084,7 @@ button,input{font:inherit}
           <span class="mini-name">${SUBJECT_SHORT[s]}</span>
         </div>
         <div class="mini-body">
-          ${visible.length?lis:""}
-          ${more>0?`<div class="mini-more">+ ${more} more</div>`:""}
+          ${tasks.length?lis:""}
         </div>
       </div>`;
     }).join("");
@@ -1320,29 +1519,51 @@ button,input{font:inherit}
   
   state.selfImprovementTasks=[];
   state.isAuthenticated=false;
+  state.selfReorderEnabled=false;
+  state._selfUndo=null;
+  state._undoTimer=null;
 
   function loadSelfTasks(){
     const saved=localStorage.getItem("selfImprovementTasks");
-    if(saved) state.selfImprovementTasks=JSON.parse(saved);
+    if(saved) try{ state.selfImprovementTasks=JSON.parse(saved);}catch(e){ state.selfImprovementTasks=[]; }
   }
 
   function saveSelfTasks(){
     localStorage.setItem("selfImprovementTasks",JSON.stringify(state.selfImprovementTasks));
+    pushToFirestore();
   }
+
+  function autoResize(el){
+    el.style.height="auto";
+    el.style.height=el.scrollHeight+"px";
+  }
+
+  function showUndo(task,idx){
+    clearTimeout(state._undoTimer);
+    state._selfUndo={task,idx};
+    const popup=$("undoPopup");
+    popup.classList.add("show");
+    state._undoTimer=setTimeout(()=>popup.classList.remove("show"),4000);
+  }
+  function hideUndo(){ const p=$("undoPopup"); if(p) p.classList.remove("show"); clearTimeout(state._undoTimer); state._selfUndo=null; }
 
   function renderSelfPlanner(){
     const container=$("selfPlannerContent");
+    container.classList.toggle("reorder-enabled",state.selfReorderEnabled);
     container.innerHTML="";
     
     state.selfImprovementTasks.forEach((task,idx)=>{
       const item=document.createElement("div");
       item.className="self-task-item"+(task.completed?" completed":"");
+      item.dataset.idx=idx;
+      if(state.selfReorderEnabled) item.draggable=true;
       item.innerHTML=`
+        <span class="drag-handle" title="Drag to reorder" draggable="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
         <label class="self-task-checkbox">
           <input type="checkbox" ${task.completed?"checked":""} data-idx="${idx}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>
         </label>
-        <input type="text" class="self-task-input" value="${task.text}" data-idx="${idx}" placeholder="Add a task...">
+        <textarea class="self-task-input" data-idx="${idx}" placeholder="Add a task..." rows="1">${escapeHtml(task.text)}</textarea>
         <button class="self-task-delete" data-idx="${idx}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
         </button>
@@ -1351,6 +1572,8 @@ button,input{font:inherit}
       const checkbox=item.querySelector("input[type='checkbox']");
       const input=item.querySelector(".self-task-input");
       const deleteBtn=item.querySelector(".self-task-delete");
+
+      input.addEventListener("input",()=>autoResize(input));
       
       checkbox.addEventListener("change",()=>{
         state.selfImprovementTasks[idx].completed=checkbox.checked;
@@ -1358,58 +1581,118 @@ button,input{font:inherit}
         saveSelfTasks();
       });
       
-      input.addEventListener("keydown",(e)=>{
-        if(e.key==="Enter"){
-          state.selfImprovementTasks[idx].text=input.value;
+      const commitEdit=()=>{
+        const val=input.value.trim();
+        if(!val){
+          // #3 empty deletes task
+          const removed=state.selfImprovementTasks.splice(idx,1)[0];
           saveSelfTasks();
           renderSelfPlanner();
-          // Auto-focus to next input
-          setTimeout(()=>{
-            const nextInput=document.querySelector(`.self-task-input[data-idx="${idx+1}"]`) || document.querySelector("#newTaskInput");
-            if(nextInput) nextInput.focus();
-          },10);
+          if(removed) showUndo(removed,idx);
+          return;
+        }
+        state.selfImprovementTasks[idx].text=val;
+        saveSelfTasks();
+        // keep height correct
+        autoResize(input);
+      };
+
+      input.addEventListener("keydown",(e)=>{
+        if(e.key==="Enter" && !e.shiftKey){
+          e.preventDefault();
+          commitEdit();
+          // if not deleted, move focus
+          if(state.selfImprovementTasks[idx]){
+            renderSelfPlanner();
+            setTimeout(()=>{
+              const nextInput=document.querySelector(`.self-task-input[data-idx="${idx+1}"]`) || document.querySelector("#newTaskInput");
+              if(nextInput){ nextInput.focus(); autoResize(nextInput); }
+            },10);
+          } else {
+            setTimeout(()=>{
+              const fallback=document.querySelector(`.self-task-input[data-idx="${idx}"]`) || document.querySelector("#newTaskInput");
+              if(fallback) fallback.focus();
+            },10);
+          }
         }
       });
       
-      input.addEventListener("blur",()=>{
-        state.selfImprovementTasks[idx].text=input.value;
-        saveSelfTasks();
-      });
+      input.addEventListener("blur",commitEdit);
       
       deleteBtn.addEventListener("click",()=>{
-        state.selfImprovementTasks.splice(idx,1);
+        const removed=state.selfImprovementTasks.splice(idx,1)[0];
         saveSelfTasks();
         renderSelfPlanner();
+        if(removed) showUndo(removed,idx);
       });
+
+      // drag & drop (#1) - only when reorder enabled
+      if(state.selfReorderEnabled){
+        item.addEventListener("dragstart",e=>{
+          e.dataTransfer.effectAllowed="move";
+          e.dataTransfer.setData("text/plain",idx);
+          item.classList.add("dragging");
+        });
+        item.addEventListener("dragend",()=>item.classList.remove("dragging"));
+        item.addEventListener("dragover",e=>{
+          e.preventDefault();
+          e.dataTransfer.dropEffect="move";
+          item.classList.add("drag-over");
+        });
+        item.addEventListener("dragleave",()=>item.classList.remove("drag-over"));
+        item.addEventListener("drop",e=>{
+          e.preventDefault();
+          item.classList.remove("drag-over");
+          const from=parseInt(e.dataTransfer.getData("text/plain"),10);
+          const to=idx;
+          if(isNaN(from) || from===to) return;
+          const arr=state.selfImprovementTasks;
+          const [moved]=arr.splice(from,1);
+          arr.splice(to,0,moved);
+          saveSelfTasks();
+          renderSelfPlanner();
+        });
+      }
       
       container.appendChild(item);
+      autoResize(input);
     });
     
     const emptyItem=document.createElement("div");
     emptyItem.className="self-task-item";
     emptyItem.innerHTML=`
+      <span class="drag-handle" style="visibility:hidden"><svg width="14" height="14"></svg></span>
       <label class="self-task-checkbox">
-        <input type="checkbox">
+        <input type="checkbox" disabled>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>
       </label>
-      <input type="text" class="self-task-input" placeholder="Add a task..." id="newTaskInput">
+      <textarea class="self-task-input" placeholder="Add a task..." id="newTaskInput" rows="1"></textarea>
     `;
     
     const newInput=emptyItem.querySelector("#newTaskInput");
+    newInput.addEventListener("input",()=>autoResize(newInput));
     newInput.addEventListener("keydown",(e)=>{
-      if(e.key==="Enter" && newInput.value.trim()){
+      if(e.key==="Enter" && !e.shiftKey){
+        e.preventDefault();
+        if(!newInput.value.trim()) return;
         state.selfImprovementTasks.push({text:newInput.value.trim(),completed:false});
         saveSelfTasks();
         renderSelfPlanner();
-        // Auto-focus to the newly created input
         setTimeout(()=>{
           const newTaskInput=document.querySelector("#newTaskInput");
-          if(newTaskInput) newTaskInput.focus();
+          if(newTaskInput){ newTaskInput.focus(); autoResize(newTaskInput); }
         },10);
       }
     });
     
     container.appendChild(emptyItem);
+    autoResize(newInput);
+    // ensure persisted height for long tasks after reload/enter
+    container.querySelectorAll(".self-task-input").forEach(autoResize);
+
+    // sync toggle UI
+    const tog=$("reorderToggle");
+    if(tog){ tog.checked=state.selfReorderEnabled; $("reorderToggleLabel").classList.toggle("active",state.selfReorderEnabled); }
   }
 
   function toggleSelfPlanner(){
@@ -1498,6 +1781,9 @@ button,input{font:inherit}
       state.calendarCursor=parseKey(state.selectedDate);
     }
     state._lastToday=getTodayKey();
+    initFirebase();
+    setupAuthUI();
+    updateAuthUI();
 
     document.addEventListener("click",handleClick);
     document.addEventListener("keydown",handleKeydown);
@@ -1538,6 +1824,8 @@ button,input{font:inherit}
       if(e.key==="Enter") authenticatePassword();
     });
     $("selfPlannerExit").addEventListener("click",exitSelfPlanner);
+    const _rt=$("reorderToggle"); if(_rt) _rt.addEventListener("change",e=>{ state.selfReorderEnabled=e.target.checked; renderSelfPlanner(); });
+    $("undoBtn").addEventListener("click",()=>{ if(state._selfUndo){ state.selfImprovementTasks.splice(state._selfUndo.idx,0,state._selfUndo.task); saveSelfTasks(); renderSelfPlanner(); hideUndo(); } });
     
     // Add keyboard shortcut listener
     document.addEventListener("keydown",handleSelfPlannerShortcut);
