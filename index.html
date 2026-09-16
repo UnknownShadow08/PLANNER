@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>94 Days Hard — JEE Planner</title>
+<title>PLANNER</title>
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="data:,">
 <style>
@@ -13,6 +13,9 @@
 html,body{height:100%;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#192030;color:#e8e8e8}
 body{overflow:hidden}
 button,input,textarea{font:inherit}
+[hidden]{display:none!important}
+img,svg{max-width:100%}
+.task-text,.mini-text,.self-task-input{overflow-wrap:anywhere}
 
 .workspace{
   max-width:1380px;margin:24px 32px 24px 128px;height:calc(100vh - 48px);
@@ -21,7 +24,7 @@ button,input,textarea{font:inherit}
 }
 
 .tracker{text-align:center;padding:18px 20px 10px;border-bottom:1px solid rgba(255,255,255,.05)}
-.tracker .date{font-family:Manrope,sans-serif;font-size:1.8rem;font-weight:800;letter-spacing:-.45px;line-height:1.15}
+.tracker .date{font-family:Manrope,sans-serif;font-size:1.8rem;font-weight:800;letter-spacing:-.45px;line-height:1.15;white-space:nowrap}
 .return-link{
   background:none;border:none;color:#9a9aaa;font-size:.62rem;font-weight:600;letter-spacing:.03em;
   margin-left:10px;vertical-align:middle;text-decoration:underline dotted;cursor:pointer
@@ -270,6 +273,7 @@ button,input,textarea{font:inherit}
   min-height:54px
 }
 .cal-day:hover{background:#2c2d38}
+.cal-day.other-month{opacity:.45}
 .cal-day.outside{opacity:.22;cursor:default}
 .cal-day.in-range{background:#222530}
 .cal-day.has-test-main{background:rgb(74 32 185 / 50%);border-color:rgb(74 32 185 / 70%)}
@@ -377,8 +381,16 @@ button,input,textarea{font:inherit}
 .menu-item.active{color:#fff;background:rgba(59,130,246,.22)}
 .menu-item.danger{color:#ef4444}
 .menu-item.danger:hover{background:#ef4444;color:#fff}
+.notes-menu-wrap{position:relative;display:flex;align-items:center}
+.notes-menu{
+  position:absolute;top:calc(100% + 8px);left:0;z-index:50;
+  width:max-content;min-width:170px;border-radius:16px;padding:8px;
+  background:#23252c;border:1px solid rgba(255,255,255,.1);box-shadow:0 10px 40px rgba(0,0,0,.5)
+}
+.notes-menu .menu-item{width:100%;flex-direction:row;justify-content:flex-start;align-items:center;gap:10px;padding:10px 12px;font-size:.7rem;border-radius:12px}
 .menu-divider{width:34px;height:1px;background:rgba(255,255,255,.1);margin:4px 0}
 #menuToggle{display:none}
+#headerMenuBtn{display:none}
 
 .modal-overlay{
   position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;
@@ -407,44 +419,84 @@ button,input,textarea{font:inherit}
 }
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
+@media(max-width:1200px){
+  .workspace{margin-right:24px}
+  .daily-grid-right{flex-basis:400px;width:400px}
+}
+@media(max-width:1024px){
+  .workspace{margin:16px 16px 16px 112px;height:calc(100vh - 32px)}
+  .daily-grid-split{height:auto;flex-direction:column}
+  .daily-grid-left{min-width:0}
+  .daily-grid-right{width:100%;flex:auto;max-width:none;position:static}
+  .header-row{flex-wrap:wrap}
+  .tabs-bar{flex:1 1 280px;min-width:0}
+  .header-right{flex:1 1 100%;justify-content:flex-start;flex-wrap:wrap;row-gap:8px}
+  .card-grid{grid-auto-columns:minmax(340px,80vw)}
+}
 @media(max-width:700px){
   body{overflow:hidden}
-  .workspace{margin:8px 4px;height:calc(100vh - 16px);border-radius:15px}
-  .tracker{padding:18px 10px 10px}.tracker .date{font-size:1.65rem}
-  .header-row{padding:6px 10px 9px}.tabs-bar{flex-basis:240px}.tab{font-size:.8rem;padding:8px 5px}
-  .stats{font-size:.68rem}.view-context{display:none}
-  .content{padding:11px 9px 5px}
+  .workspace{margin:8px;height:calc(100vh - 16px);border-radius:15px;max-width:none}
+  .tracker{padding:18px 10px 10px}.tracker .date{font-size:clamp(1.05rem,5.2vw,1.65rem);line-height:1.2;white-space:nowrap}
+  .header-row{padding:6px 10px 9px;gap:8px}.tabs-bar{flex:1 1 100%;order:3;flex-basis:auto}.tab{font-size:.8rem;padding:8px 5px}
+  .stats{font-size:.68rem}.view-context{display:none}.auth-badge{display:none}
+  .content{padding:11px 9px 12px}
+  .self-planner{padding:16px}.self-planner-header{margin-bottom:16px}.self-planner-title{font-size:1.4rem}
+  .self-task-input{font-size:1rem}
+  .daily-grid-split{flex-direction:column;height:auto}
   .subject-group{gap:10px;margin-bottom:18px}
   .rail{flex:0 0 44px;width:44px}
   .cal-day{min-height:52px;padding:6px}.weekdays,.calendar-grid{gap:4px}
   .cal-day{font-size:.72rem}.day-mini{display:none}
-  .card-grid{grid-auto-columns:minmax(300px,86vw)}
+  .card-grid{grid-auto-flow:row;grid-template-columns:minmax(0,1fr);grid-auto-rows:auto;overflow-x:hidden;overflow-y:visible;height:auto}
+  .plan-card{min-height:0}
+  .mini-subject{min-height:72px}
   .scope-title{min-width:175px;font-size:.9rem}
+  #headerMenuBtn{display:flex}
+  .header-right{position:relative}
   .side-menu{
-    left:14px;bottom:14px;top:auto;transform:none;width:56px;height:56px;padding:0;justify-content:center
+    display:none;position:absolute;top:calc(100% + 8px);left:0;right:auto;bottom:auto;transform:none;z-index:50;
+    width:max-content;min-width:190px;border-radius:16px;padding:8px;
+    background:#23252c;border:1px solid rgba(255,255,255,.1);box-shadow:0 10px 40px rgba(0,0,0,.5)
   }
-  .menu-items{display:none}
-  #menuToggle{
-    display:flex;width:100%;height:100%;align-items:center;justify-content:center;
-    background:transparent;border:0;color:#c7c7d6;cursor:pointer;border-radius:999px
-  }
-  #menuToggle svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-  #menuToggle:hover{color:#fff;background:#2c2d38}
-  .side-menu.open{width:78px;height:auto;padding:16px 0 10px}
-  .side-menu.open .menu-items{display:flex}
-  .side-menu.open #menuToggle{display:none}
+  .side-menu.open{display:block}
+  .side-menu .menu-items{display:flex;flex-direction:column;align-items:stretch;gap:4px;width:100%}
+  .side-menu .menu-item{width:100%;flex-direction:row;justify-content:flex-start;align-items:center;gap:10px;padding:10px 12px;font-size:.7rem;border-radius:12px}
+  .side-menu .menu-divider{width:auto;height:1px;margin:4px 2px}
+  #menuToggle{display:none}
+  .log-row{position:fixed;left:12px;right:12px;bottom:12px;top:auto;z-index:15;margin:0;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 }
 </style>
 </head>
 <body>
+<div class="workspace">
+  <div class="tracker">
+    <div class="date"><span id="datePart"></span>, <span class="day-name" id="dayPart"></span><button class="return-link" id="returnBtn" hidden></button></div>
+    <div class="challenge-day" id="challengeDay"></div>
+  </div>
+
+  <div class="header-row">
+    <div class="stats"><span class="count" id="completedCount">0</span> completed</div>
+    <div class="tabs-bar">
+      <div class="tab active" data-tab="daily">Daily</div>
+      <div class="tab" data-tab="weekly">Weekly</div>
+      <div class="tab" data-tab="monthly">Monthly</div>
+    </div>
+    <div class="header-right">
+      <button class="view-toggle-btn" id="headerMenuBtn" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></svg>
+      </button>
 <nav class="side-menu" id="sideMenu">
   <button id="menuToggle" aria-label="Menu">
     <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></svg>
   </button>
   <div class="menu-items">
-    <button class="menu-item active" title="Home">
+    <button class="menu-item active" id="homeBtn" title="Home">
       <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5 10v10h14V10"></path><path d="M10 20v-6h4v6"></path></svg>
       <span>Home</span>
+    </button>
+    <button class="menu-item" id="notesBtn" title="Notes">
+      <svg viewBox="0 0 24 24"><path d="M15.5 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"></path><path d="M15 3v6h6"></path><path d="M9 13h6"></path><path d="M9 17h4"></path></svg>
+      <span>Notes</span>
     </button>
     <button class="menu-item" id="exportBtn" title="Export all data to a .json backup file" aria-label="Export all data">
       <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -461,20 +513,6 @@ button,input,textarea{font:inherit}
     </button>
   </div>
 </nav>
-<div class="workspace">
-  <div class="tracker">
-    <div class="date"><span id="datePart"></span>, <span class="day-name" id="dayPart"></span><button class="return-link" id="returnBtn" hidden></button></div>
-    <div class="challenge-day" id="challengeDay"></div>
-  </div>
-
-  <div class="header-row">
-    <div class="stats"><span class="count" id="completedCount">0</span> completed</div>
-    <div class="tabs-bar">
-      <div class="tab active" data-tab="daily">Daily</div>
-      <div class="tab" data-tab="weekly">Weekly</div>
-      <div class="tab" data-tab="monthly">Monthly</div>
-    </div>
-    <div class="header-right">
       <div class="stats stats-right"><span class="count" id="totalCount">0</span> total</div>
       <span class="view-context" id="viewContext"></span>
       <button class="auth-btn" id="authBtn">Sign Up</button>
@@ -495,6 +533,28 @@ button,input,textarea{font:inherit}
       </div>
     </div>
     <div class="self-planner-content" id="selfPlannerContent"></div>
+  </div>
+
+  <!-- Notes (same UI as Self Improvement, no exit button) -->
+  <div class="self-planner" id="notesPage" style="display:none;" hidden>
+    <div class="self-planner-header">
+      <div class="notes-menu-wrap">
+        <button class="view-toggle-btn" id="notesMenuBtn" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></svg>
+        </button>
+        <div class="notes-menu" id="notesMenu" hidden>
+          <button class="menu-item" id="notesHomeBtn" title="Home">
+            <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5 10v10h14V10"></path><path d="M10 20v-6h4v6"></path></svg>
+            <span>Home</span>
+          </button>
+        </div>
+      </div>
+      <h1 class="self-planner-title">Notes</h1>
+      <div class="self-planner-controls">
+        <label class="reorder-toggle" id="notesReorderLabel"><input type="checkbox" id="notesReorderToggle"> Reorder</label>
+      </div>
+    </div>
+    <div class="self-planner-content" id="notesContent"></div>
   </div>
 
 </div>
@@ -583,6 +643,9 @@ button,input,textarea{font:inherit}
     _logFocused: false,
     gridLog: {},
     gridLogFocus: null,
+    _gridGotoCurrent: true,
+    _gridPrevLeft: null,
+    _contentPrevTop: null,
     data: { monthly:{}, weekly:{}, daily:{} }
   };
 
@@ -717,10 +780,12 @@ button,input,textarea{font:inherit}
           if(parsed.ui.selectedMonth) state.selectedMonth=parsed.ui.selectedMonth;
         }
         if(Array.isArray(data.selfTasks) && data.selfTasks.length) state.selfImprovementTasks=data.selfTasks;
+        if(Array.isArray(data.notesTasks) && data.notesTasks.length) state.notesTasks=data.notesTasks;
         // also persist merged cloud data locally so refresh without network keeps it
         localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
         if(Array.isArray(data.selfTasks)) localStorage.setItem("selfImprovementTasks", JSON.stringify(data.selfTasks));
-        render(); if(typeof renderSelfPlanner==="function" && $("selfPlanner").style.display!=="none") renderSelfPlanner();
+        if(Array.isArray(data.notesTasks)) localStorage.setItem("notesTasks", JSON.stringify(data.notesTasks));
+        render(); if(typeof renderSelfPlanner==="function" && $("selfPlanner").style.display!=="none") renderSelfPlanner(); if(typeof renderNotes==="function" && $("notesPage") && $("notesPage").style.display!=="none") renderNotes();
       }catch(e){ console.warn("Firestore parse failed",e); }
     }, err=>{ console.warn("Firestore sync error",err); });
     fbUnsubs.push(unsub);
@@ -732,6 +797,7 @@ button,input,textarea{font:inherit}
       const payload={
         plannerState: JSON.stringify({ version:1, startDate:START_DATE, endDate:END_DATE, data:state.data, ui:{ activeTab:state.activeTab, views:state.views, selectedDate:state.selectedDate, selectedWeek:state.selectedWeek, selectedMonth:state.selectedMonth, calendarCursor:state.calendarCursor?dateKey(state.calendarCursor):null } }),
         selfTasks: state.selfImprovementTasks,
+        notesTasks: state.notesTasks,
         email: fbUser.email,
         lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
       };
@@ -1057,10 +1123,11 @@ button,input,textarea{font:inherit}
 
     for(let i=0;i<42;i++){
       const d=addDays(startCell,i), key=dateKey(d), valid=inRange(d);
+      const otherMonth=d.getMonth()!==m;
       const bucket=state.data.daily[key];
       const dots=valid && bucket ? SUBJECTS.map(s=>(bucket[s]||[]).length?`<span class="cal-dot dot-${s[0]}"></span>`:"").join(""):"";
       const count=valid ? SUBJECTS.reduce((n,s)=>n+(bucket?.[s]?.length||0),0):0;
-      html+=`<div class="cal-day ${valid?"in-range":"outside"} ${d.getDay()===0?"sunday":""} ${key===state.selectedDate?"selected":""} ${key===getTodayKey()?"today":""}" ${valid?`data-calendar-date="${key}"`:""}>
+      html+=`<div class="cal-day ${valid?"in-range":"outside"}${otherMonth?" other-month":""} ${d.getDay()===0?"sunday":""} ${key===state.selectedDate?"selected":""} ${key===getTodayKey()?"today":""}" ${valid?`data-calendar-date="${key}"`:""}>
         <div class="day-num">${d.getDate()}</div>
         ${count?`<div class="day-mini">${count} task${count===1?"":"s"}</div>`:""}
         <div class="cal-dots">${dots}</div>
@@ -1132,15 +1199,40 @@ button,input,textarea{font:inherit}
       cards.push(planCard("weekly",String(i),`Week ${i+1}`,`${formatDate(r.start)} – ${formatDate(r.end)}`,i===state.selectedWeek));
     }
     $("content").innerHTML=`<div class="card-grid">${cards.join("")}</div>`;
+    settleGridScroll();
   }
 
   function renderMonthlyGrid(){
     $("viewContext").textContent="All months in the 94-day plan";
     const cards=monthKeys().map(k=>planCard("monthly",k,monthLabel(k),k===getMonthKeyForDate(START_DATE)?"Plan start":k===getMonthKeyForDate(END_DATE)?"Final month":"",k===state.selectedMonth));
     $("content").innerHTML=`<div class="card-grid">${cards.join("")}</div>`;
+    settleGridScroll();
+  }
+
+  // ponytail: rebuilding innerHTML resets scroll — restore it, or snap the current card to front on navigation
+  function settleGridScroll(){
+    const grid=document.querySelector(".card-grid");
+    const content=$("content");
+    if(!grid) return;
+    const vertical=getComputedStyle(grid).gridAutoFlow.charAt(0)==="r";
+    const sel=grid.querySelector(".plan-card.selected")||grid.firstElementChild;
+    if(!state._gridGotoCurrent){
+      if(typeof state._gridPrevLeft==="number") grid.scrollLeft=state._gridPrevLeft;
+      if(content && typeof state._contentPrevTop==="number") content.scrollTop=state._contentPrevTop;
+    }else if(vertical && content && sel){
+      const cRect=content.getBoundingClientRect(), sRect=sel.getBoundingClientRect();
+      content.scrollTop+=(sRect.top-cRect.top)-8;
+    }else if(sel){
+      grid.scrollLeft=Math.max(0,sel.offsetLeft-grid.offsetLeft-2);
+    }
+    state._gridGotoCurrent=false;
   }
 
   function render(){
+    const _prevGrid=document.querySelector(".card-grid");
+    state._gridPrevLeft=_prevGrid?_prevGrid.scrollLeft:null;
+    const _prevContent=$("content");
+    state._contentPrevTop=_prevContent?_prevContent.scrollTop:null;
     updateTracker();
     updateStats();
     document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===state.activeTab));
@@ -1228,13 +1320,15 @@ button,input,textarea{font:inherit}
   function exportData(){
     const raw=localStorage.getItem(STORAGE_KEY);
     const selfTasks=localStorage.getItem("selfImprovementTasks");
-    
-    if(!raw && !selfTasks){showToast("Nothing to export");return;}
+    const notesTasks=localStorage.getItem("notesTasks");
+
+    if(!raw && !selfTasks && !notesTasks){showToast("Nothing to export");return;}
     
     // Create comprehensive backup with both planner and self-improvement data
     const backup={
       plannerData: raw ? JSON.parse(raw) : null,
       selfImprovementData: selfTasks ? JSON.parse(selfTasks) : [],
+      notesData: notesTasks ? JSON.parse(notesTasks) : [],
       exportDate: new Date().toISOString(),
       version: 1
     };
@@ -1245,7 +1339,7 @@ button,input,textarea{font:inherit}
     a.download=`jee-planner-complete-backup-${getTodayKey()}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
-    showToast("Complete backup downloaded (planner + self-improvement)");
+    showToast("Complete backup downloaded (planner + self-improvement + notes)");
   }
 
   function importFile(file){
@@ -1253,17 +1347,18 @@ button,input,textarea{font:inherit}
     reader.onload=async ()=>{
       try{
         const parsed=JSON.parse(reader.result);
-        let plannerToPush=null, selfToPush=null;
+        let plannerToPush=null, selfToPush=null, notesToPush=null;
         // Handle new format (with plannerData and selfImprovementData)
         if(parsed.version === 1 && parsed.plannerData){
           if(parsed.plannerData) localStorage.setItem(STORAGE_KEY,JSON.stringify(parsed.plannerData));
           if(parsed.selfImprovementData) localStorage.setItem("selfImprovementTasks",JSON.stringify(parsed.selfImprovementData));
-          plannerToPush=parsed.plannerData; selfToPush=parsed.selfImprovementData||[];
+          if(parsed.notesData) localStorage.setItem("notesTasks",JSON.stringify(parsed.notesData));
+          plannerToPush=parsed.plannerData; selfToPush=parsed.selfImprovementData||[]; notesToPush=parsed.notesData||state.notesTasks||[];
         }
         // Handle old format (just planner data)
         else if(!parsed.version && parsed.data){
           localStorage.setItem(STORAGE_KEY,JSON.stringify(parsed));
-          plannerToPush=parsed; selfToPush=[];
+          plannerToPush=parsed; selfToPush=[]; notesToPush=state.notesTasks||[];
         }
         else{
           throw new Error("bad format");
@@ -1274,13 +1369,14 @@ button,input,textarea{font:inherit}
             await fbDb.collection("users").doc(fbUser.uid).set({
               plannerState: JSON.stringify(plannerToPush),
               selfTasks: selfToPush,
+              notesTasks: notesToPush,
               email: fbUser.email,
               lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
             }, {merge:true});
             showToast("Data imported & synced to cloud");
           }catch(e){ console.warn("Firestore import push failed",e); showToast("Data imported locally (cloud sync failed)"); }
         } else {
-          showToast("Data imported (planner + self-improvement)");
+          showToast("Data imported (planner + self-improvement + notes)");
         }
         setTimeout(()=>location.reload(), 700);
       }catch(e){ 
@@ -1303,6 +1399,7 @@ button,input,textarea{font:inherit}
 
   function switchTab(tab){
     state.activeTab=tab;
+    state._gridGotoCurrent=true;
     if(tab==="weekly") state.selectedWeek=weekIndexForDate(state.selectedDate);
     if(tab==="monthly") state.selectedMonth=getMonthKeyForDate(state.selectedDate);
     render();
@@ -1311,6 +1408,7 @@ button,input,textarea{font:inherit}
 
   function switchView(view){
     state.views[state.activeTab]=view;
+    state._gridGotoCurrent=true;
     if(state.activeTab==="daily" && view==="grid") state.calendarCursor=parseKey(state.selectedDate);
     render();
     save();
@@ -1551,8 +1649,11 @@ button,input,textarea{font:inherit}
   const CORRECT_PASSWORD_HASH=window.hashPassword("peace");
   
   state.selfImprovementTasks=[];
+  state.notesTasks=[];
+  state.currentView="home";
   state.isAuthenticated=false;
   state.selfReorderEnabled=false;
+  state.notesReorderEnabled=false;
   state._selfUndo=null;
   state._undoTimer=null;
 
@@ -1566,14 +1667,24 @@ button,input,textarea{font:inherit}
     pushToFirestore();
   }
 
+  function loadNotesTasks(){
+    const saved=localStorage.getItem("notesTasks");
+    if(saved) try{ state.notesTasks=JSON.parse(saved);}catch(e){ state.notesTasks=[]; }
+  }
+
+  function saveNotesTasks(){
+    localStorage.setItem("notesTasks",JSON.stringify(state.notesTasks));
+    pushToFirestore();
+  }
+
   function autoResize(el){
     el.style.height="auto";
     el.style.height=el.scrollHeight+"px";
   }
 
-  function showUndo(task,idx){
+  function showUndo(task,idx,kind){
     clearTimeout(state._undoTimer);
-    state._selfUndo={task,idx};
+    state._selfUndo={task,idx,kind:kind||"self"};
     const popup=$("undoPopup");
     popup.classList.add("show");
     state._undoTimer=setTimeout(()=>popup.classList.remove("show"),4000);
@@ -1728,6 +1839,174 @@ button,input,textarea{font:inherit}
     if(tog){ tog.checked=state.selfReorderEnabled; $("reorderToggleLabel").classList.toggle("active",state.selfReorderEnabled); }
   }
 
+  // ponytail: Notes reuses the Self Improvement checklist UI (same classes/markup), scoped to #notesContent
+  function renderNotes(){
+    const container=$("notesContent");
+    if(!container) return;
+    container.classList.toggle("reorder-enabled",state.notesReorderEnabled);
+    container.innerHTML="";
+
+    state.notesTasks.forEach((task,idx)=>{
+      const item=document.createElement("div");
+      item.className="self-task-item"+(task.completed?" completed":"");
+      item.dataset.idx=idx;
+      if(state.notesReorderEnabled) item.draggable=true;
+      item.innerHTML=`
+        <span class="drag-handle" title="Drag to reorder" draggable="false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg></span>
+        <label class="self-task-checkbox">
+          <input type="checkbox" ${task.completed?"checked":""} data-idx="${idx}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </label>
+        <textarea class="self-task-input" data-idx="${idx}" placeholder="Add a task..." rows="1">${escapeHtml(task.text)}</textarea>
+        <button class="self-task-delete" data-idx="${idx}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
+      `;
+
+      const checkbox=item.querySelector("input[type='checkbox']");
+      const input=item.querySelector(".self-task-input");
+      const deleteBtn=item.querySelector(".self-task-delete");
+
+      input.addEventListener("input",()=>autoResize(input));
+
+      checkbox.addEventListener("change",()=>{
+        state.notesTasks[idx].completed=checkbox.checked;
+        item.classList.toggle("completed");
+        saveNotesTasks();
+      });
+
+      const commitEdit=()=>{
+        const val=input.value.trim();
+        if(!val){
+          const removed=state.notesTasks.splice(idx,1)[0];
+          saveNotesTasks();
+          renderNotes();
+          if(removed) showUndo(removed,idx,"notes");
+          return;
+        }
+        state.notesTasks[idx].text=val;
+        saveNotesTasks();
+        autoResize(input);
+      };
+
+      input.addEventListener("keydown",(e)=>{
+        if(e.key==="Enter" && !e.shiftKey){
+          e.preventDefault();
+          commitEdit();
+          if(state.notesTasks[idx]){
+            renderNotes();
+            setTimeout(()=>{
+              const nextInput=container.querySelector(`.self-task-input[data-idx="${idx+1}"]`) || container.querySelector("#notesNewTaskInput");
+              if(nextInput){ nextInput.focus(); autoResize(nextInput); }
+            },10);
+          } else {
+            setTimeout(()=>{
+              const fallback=container.querySelector(`.self-task-input[data-idx="${idx}"]`) || container.querySelector("#notesNewTaskInput");
+              if(fallback) fallback.focus();
+            },10);
+          }
+        }
+      });
+
+      input.addEventListener("blur",commitEdit);
+
+      deleteBtn.addEventListener("click",()=>{
+        const removed=state.notesTasks.splice(idx,1)[0];
+        saveNotesTasks();
+        renderNotes();
+        if(removed) showUndo(removed,idx,"notes");
+      });
+
+      if(state.notesReorderEnabled){
+        item.addEventListener("dragstart",e=>{
+          e.dataTransfer.effectAllowed="move";
+          e.dataTransfer.setData("text/plain",idx);
+          item.classList.add("dragging");
+        });
+        item.addEventListener("dragend",()=>item.classList.remove("dragging"));
+        item.addEventListener("dragover",e=>{
+          e.preventDefault();
+          e.dataTransfer.dropEffect="move";
+          item.classList.add("drag-over");
+        });
+        item.addEventListener("dragleave",()=>item.classList.remove("drag-over"));
+        item.addEventListener("drop",e=>{
+          e.preventDefault();
+          item.classList.remove("drag-over");
+          const from=parseInt(e.dataTransfer.getData("text/plain"),10);
+          const to=idx;
+          if(isNaN(from) || from===to) return;
+          const arr=state.notesTasks;
+          const [moved]=arr.splice(from,1);
+          arr.splice(to,0,moved);
+          saveNotesTasks();
+          renderNotes();
+        });
+      }
+
+      container.appendChild(item);
+      autoResize(input);
+    });
+
+    const emptyItem=document.createElement("div");
+    emptyItem.className="self-task-item";
+    emptyItem.innerHTML=`
+      <span class="drag-handle" style="visibility:hidden"><svg width="14" height="14"></svg></span>
+      <label class="self-task-checkbox">
+        <input type="checkbox" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </label>
+      <textarea class="self-task-input" placeholder="Add a task..." id="notesNewTaskInput" rows="1"></textarea>
+    `;
+
+    const newInput=emptyItem.querySelector("#notesNewTaskInput");
+    newInput.addEventListener("input",()=>autoResize(newInput));
+    newInput.addEventListener("keydown",(e)=>{
+      if(e.key==="Enter" && !e.shiftKey){
+        e.preventDefault();
+        if(!newInput.value.trim()) return;
+        state.notesTasks.push({text:newInput.value.trim(),completed:false});
+        saveNotesTasks();
+        renderNotes();
+        setTimeout(()=>{
+          const ni=container.querySelector("#notesNewTaskInput");
+          if(ni){ ni.focus(); autoResize(ni); }
+        },10);
+      }
+    });
+
+    container.appendChild(emptyItem);
+    autoResize(newInput);
+    container.querySelectorAll(".self-task-input").forEach(autoResize);
+
+    const tog=$("notesReorderToggle");
+    if(tog){ tog.checked=state.notesReorderEnabled; $("notesReorderLabel").classList.toggle("active",state.notesReorderEnabled); }
+  }
+
+  // ponytail: single router for home/self/notes — header-row stays only on home
+  function showView(name){
+    state.currentView=name;
+    const tracker=document.querySelector(".tracker");
+    const headerRow=document.querySelector(".header-row");
+    const content=$("content");
+    const self=$("selfPlanner");
+    const notes=$("notesPage");
+    const home=name==="home";
+    if(tracker) tracker.hidden=!home;
+    if(headerRow) headerRow.hidden=!home;
+    if(content) content.hidden=!home;
+    if(self){ self.hidden=name!=="self"; self.style.display=name==="self"?"flex":"none"; }
+    if(notes){ notes.hidden=name!=="notes"; notes.style.display=name==="notes"?"flex":"none"; }
+    const homeBtn=$("homeBtn"), notesBtn=$("notesBtn");
+    if(homeBtn) homeBtn.classList.toggle("active",name==="home");
+    if(notesBtn) notesBtn.classList.toggle("active",name==="notes");
+    if(name==="self"){ loadSelfTasks(); renderSelfPlanner(); }
+    if(name==="notes"){ const nm=$("notesMenu"); if(nm) nm.hidden=true; loadNotesTasks(); renderNotes(); }
+    if(home){ state._gridGotoCurrent=true; render(); }
+    const menu=$("sideMenu");
+    if(menu && window.innerWidth<=700) menu.classList.remove("open");
+  }
+
   function toggleSelfPlanner(){
     if(!state.isAuthenticated){
       $("passwordModal").classList.add("show");
@@ -1735,38 +2014,17 @@ button,input,textarea{font:inherit}
       return;
     }
     
-    const tracker=document.querySelector(".tracker");
-    const headerRow=document.querySelector(".header-row");
-    const content=$("content");
-    const planner=$("selfPlanner");
-    
-    if(planner.style.display==="none"){
-      tracker.hidden=true;
-      headerRow.hidden=true;
-      content.hidden=true;
-      planner.style.display="flex";
-      renderSelfPlanner();
-      loadSelfTasks();
-    }else{
-      tracker.hidden=false;
-      headerRow.hidden=false;
-      content.hidden=false;
-      planner.style.display="none";
+    if(state.currentView==="self"){
+      showView("home");
       // Lock the session - need password again to access
       state.isAuthenticated=false;
+    }else{
+      showView("self");
     }
   }
 
   function exitSelfPlanner(){
-    const tracker=document.querySelector(".tracker");
-    const headerRow=document.querySelector(".header-row");
-    const content=$("content");
-    const planner=$("selfPlanner");
-    
-    planner.style.display="none";
-    tracker.hidden=false;
-    headerRow.hidden=false;
-    content.hidden=false;
+    showView("home");
     // Reset authentication - need password again to access
     state.isAuthenticated=false;
   }
@@ -1846,6 +2104,18 @@ button,input,textarea{font:inherit}
       e.target.value="";
     });
     $("menuToggle").addEventListener("click",()=>$("sideMenu").classList.toggle("open"));
+    $("headerMenuBtn")?.addEventListener("click",()=>$("sideMenu").classList.toggle("open"));
+    $("homeBtn")?.addEventListener("click",()=>showView("home"));
+    $("notesBtn")?.addEventListener("click",()=>showView("notes"));
+    $("notesMenuBtn")?.addEventListener("click",()=>{ const nm=$("notesMenu"); if(nm) nm.hidden=!nm.hidden; });
+    $("notesHomeBtn")?.addEventListener("click",()=>{ const nm=$("notesMenu"); if(nm) nm.hidden=true; showView("home"); });
+    // ponytail: collapse expanded mobile menu on outside tap
+    document.addEventListener("click",e=>{
+      const menu=$("sideMenu");
+      if(menu && menu.classList.contains("open") && !e.target.closest("#sideMenu,#headerMenuBtn")) menu.classList.remove("open");
+      const nm=$("notesMenu");
+      if(nm && !nm.hidden && !e.target.closest("#notesMenu,#notesMenuBtn")) nm.hidden=true;
+    });
     
     // Password modal and self-planner event listeners
     $("passwordSubmit").addEventListener("click",authenticatePassword);
@@ -1858,13 +2128,20 @@ button,input,textarea{font:inherit}
     });
     $("selfPlannerExit").addEventListener("click",exitSelfPlanner);
     const _rt=$("reorderToggle"); if(_rt) _rt.addEventListener("change",e=>{ state.selfReorderEnabled=e.target.checked; renderSelfPlanner(); });
-    $("undoBtn").addEventListener("click",()=>{ if(state._selfUndo){ state.selfImprovementTasks.splice(state._selfUndo.idx,0,state._selfUndo.task); saveSelfTasks(); renderSelfPlanner(); hideUndo(); } });
+    const _nt=$("notesReorderToggle"); if(_nt) _nt.addEventListener("change",e=>{ state.notesReorderEnabled=e.target.checked; renderNotes(); });
+    $("undoBtn").addEventListener("click",()=>{
+      if(!state._selfUndo) return;
+      if(state._selfUndo.kind==="notes"){ state.notesTasks.splice(state._selfUndo.idx,0,state._selfUndo.task); saveNotesTasks(); renderNotes(); }
+      else { state.selfImprovementTasks.splice(state._selfUndo.idx,0,state._selfUndo.task); saveSelfTasks(); renderSelfPlanner(); }
+      hideUndo();
+    });
     
     // Add keyboard shortcut listener
     document.addEventListener("keydown",handleSelfPlannerShortcut);
     
-    // Load saved self-improvement tasks
+    // Load saved self-improvement + notes tasks
     loadSelfTasks();
+    loadNotesTasks();
 
     render();
     markTestDates();
