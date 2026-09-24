@@ -391,6 +391,9 @@ img,svg{max-width:100%}
 .menu-divider{width:34px;height:1px;background:rgba(255,255,255,.1);margin:4px 0}
 #menuToggle{display:none}
 #headerMenuBtn{display:none}
+#dashboardMenuBtn{display:none}
+#settingsMenuBtn{display:none}
+#notesMenuBtn{display:none}
 
 .modal-overlay{
   position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;
@@ -409,6 +412,78 @@ img,svg{max-width:100%}
 .modal-btn.export{border-color:rgba(96,165,250,.5);color:#93c5fd}
 .modal-btn.danger{background:#ef4444;border-color:#ef4444;color:#fff}
 .modal-btn.danger:hover{background:#dc2626}
+
+/* Dashboard 2x2 squares (Phase 2: resources live in bottom-right square) */
+.dash-grid{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:auto;gap:14px;padding-right:4px;align-content:start;align-items:start}
+.dash-grid::-webkit-scrollbar{width:6px}
+.dash-grid::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:10px}
+.dash-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;display:flex;flex-direction:column;min-height:200px;max-height:52vh;overflow:hidden}
+.dash-card h3{font-family:Manrope,sans-serif;font-size:1rem;font-weight:800;color:#fff;margin-bottom:4px}
+.dash-card .dash-sub{font-size:.75rem;color:#8a8a9e;margin-bottom:12px}
+.dash-card .dash-body{flex:1;min-height:0;overflow-y:auto;font-size:.85rem;color:#9a9aaa;line-height:1.5}
+.dash-card .dash-body::-webkit-scrollbar{width:5px}
+.dash-card .dash-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:99px}
+.res-subject{margin-bottom:12px}
+.res-subject-title{font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--acc-soft,#93c5fd);margin-bottom:6px}
+.res-item{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.84rem}
+.res-item a{flex:1;min-width:0;color:#93c5fd;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.res-item a:hover{color:#fff;text-decoration:underline}
+.res-del{background:none;border:0;color:#ef4444;cursor:pointer;font-size:1rem;line-height:1;padding:0 4px;opacity:.6}
+.res-del:hover{opacity:1}
+.dash-add{margin-top:10px;width:100%;padding:8px;border-radius:8px;border:1px dashed rgba(96,165,250,.4);background:rgba(96,165,250,.08);color:#93c5fd;font-weight:700;font-size:.8rem;cursor:pointer;transition:.2s}
+.dash-add:hover{background:rgba(96,165,250,.18);color:#fff}
+.res-form-row{margin-bottom:12px}
+.res-form-row label{display:block;color:#e8e8e8;font-weight:600;margin-bottom:6px;font-size:.85rem}
+.res-form-row input,.res-form-row select{width:100%;padding:10px 12px;background:#0a0f1a;border:1.5px solid rgba(255,255,255,.1);border-radius:8px;color:#e8e8e8;font-size:.9rem;font-family:Inter,sans-serif}
+.res-form-row input:focus,.res-form-row select:focus{outline:none;border-color:rgba(96,165,250,.4)}
+@media(max-width:700px){.dash-grid{grid-template-columns:1fr}.dash-card{max-height:62vh}.dash-tall{grid-row:auto;max-height:62vh}}
+.q-date-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.q-date{font-size:.78rem;color:#c7c7d6;font-weight:700}
+.q-today{background:none;border:1px solid rgba(255,255,255,.12);color:#9a9aaa;border-radius:6px;font-size:.72rem;padding:3px 8px;cursor:pointer}
+.q-today:hover{color:#fff;background:rgba(255,255,255,.06)}
+.q-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.84rem}
+.q-item:last-child{border-bottom:0}
+.q-check{width:16px;height:16px;flex:0 0 auto;border-radius:4px;border:1.5px solid rgba(255,255,255,.24);background:transparent;cursor:pointer}
+.q-check.done{background:#10b981;border-color:#10b981;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>');background-size:60%;background-position:center;background-repeat:no-repeat}
+.q-text{flex:1;min-width:0;word-break:break-word;color:#d0d0da}
+.q-item.done .q-text{text-decoration:line-through;opacity:.42}
+.q-badge{font-size:.62rem;font-weight:800;letter-spacing:.06em;color:var(--acc-soft,#9a9aaa);white-space:nowrap}
+.q-why{font-size:.7rem;color:#8a8a9e;margin-top:2px}
+.dash-tall{grid-row:span 2;max-height:calc(52vh*2 + 14px)}
+.bulk-warn{color:#fbbf24}
+.bulk-stat{color:#fff;font-weight:700}
+
+.today-row{display:flex;justify-content:space-between;gap:8px;font-size:.84rem;color:#c7c7d6;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.today-row:last-of-type{border-bottom:0}
+.today-row b{color:#fff}
+.q-main{flex:1;min-width:0}
+.checkin-center{text-align:center;color:#9a9aaa;font-size:.88rem;line-height:1.6}
+.checkin-msg{font-size:.8rem;color:#fbbf24;min-height:1.2em;margin:10px 0;text-align:center}
+.spinner{width:34px;height:34px;border:3px solid rgba(255,255,255,.12);border-top-color:#60a5fa;border-radius:50%;animation:checkinspin .9s linear infinite;margin:18px auto 10px}
+@keyframes checkinspin{to{transform:rotate(360deg)}}
+.key-ticks{display:flex;gap:12px;margin:10px 0 4px;font-size:.78rem;color:#8a8a9e}
+.tick.ok{color:#86efac}
+.tick.bad{color:#fca5a5}
+/* Settings: sub-sidebar + panes (reuses .self-planner shell) */
+.settings-wrap{flex:1;min-height:0;display:flex;gap:14px}
+.settings-side{flex:0 0 180px;display:flex;flex-direction:column;gap:8px}
+.settings-topic{padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#9a9aaa;font-weight:700;font-size:.82rem;cursor:pointer;text-align:left;transition:.2s}
+.settings-topic:hover{color:#fff;background:rgba(255,255,255,.07)}
+.settings-topic.active{background:rgba(96,165,250,.15);border-color:rgba(96,165,250,.4);color:#fff}
+.settings-main{flex:1;min-width:0;overflow-y:auto;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:18px}
+.settings-main::-webkit-scrollbar{width:6px}
+.settings-main::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:10px}
+.settings-pane{display:none}
+.settings-pane.active{display:block}
+.settings-pane h3{font-family:Manrope,sans-serif;font-size:1rem;font-weight:800;color:#fff;margin-bottom:4px}
+.settings-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.settings-btn{padding:10px 16px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:#2c2d37;color:#d0d0da;font-weight:700;font-size:.82rem;cursor:pointer;transition:.2s}
+.settings-btn:hover{background:#383a46;color:#fff}
+.settings-btn.primary{border-color:rgba(96,165,250,.5);color:#93c5fd}
+.settings-btn.primary:hover{background:rgba(96,165,250,.15);color:#fff}
+.settings-btn.on{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.4);color:#6ee7b7}
+.notif-status{font-size:.8rem;color:#8a8a9e;margin-top:10px;line-height:1.5}
+@media(max-width:700px){.settings-wrap{flex-direction:column;overflow-y:auto}.settings-side{flex:none;flex-direction:row;overflow-x:auto}.settings-topic{white-space:nowrap}.settings-main{overflow:visible}}
 
 .input-wrapper{display:none}
 
@@ -452,9 +527,11 @@ img,svg{max-width:100%}
   .mini-subject{min-height:72px}
   .scope-title{min-width:175px;font-size:.9rem}
   #headerMenuBtn{display:flex}
-  .header-right{position:relative}
+  #dashboardMenuBtn{display:flex}
+  #settingsMenuBtn{display:flex}
+  #notesMenuBtn{display:flex}
   .side-menu{
-    display:none;position:absolute;top:calc(100% + 8px);left:0;right:auto;bottom:auto;transform:none;z-index:50;
+    display:none;position:fixed;top:70px;left:8px;right:auto;bottom:auto;transform:none;z-index:200;
     width:max-content;min-width:190px;border-radius:16px;padding:8px;
     background:#23252c;border:1px solid rgba(255,255,255,.1);box-shadow:0 10px 40px rgba(0,0,0,.5)
   }
@@ -468,6 +545,35 @@ img,svg{max-width:100%}
 </style>
 </head>
 <body>
+<!-- ponytail: side menu lives outside .workspace so it never disappears when views switch -->
+<nav class="side-menu" id="sideMenu">
+  <button id="menuToggle" aria-label="Menu">
+    <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></svg>
+  </button>
+  <div class="menu-items">
+    <button class="menu-item active" id="homeBtn" title="Home">
+      <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5 10v10h14V10"></path><path d="M10 20v-6h4v6"></path></svg>
+      <span>Home</span>
+    </button>
+    <button class="menu-item" id="notesBtn" title="Notes">
+      <svg viewBox="0 0 24 24"><path d="M15.5 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"></path><path d="M15 3v6h6"></path><path d="M9 13h6"></path><path d="M9 17h4"></path></svg>
+      <span>Notes</span>
+    </button>
+    <button class="menu-item" id="dashboardBtn" title="Dashboard">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></svg>
+      <span>Dashboard</span>
+    </button>
+    <button class="menu-item" id="settingsBtn" title="Settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      <span>Settings</span>
+    </button>
+    <div class="menu-divider"></div>
+    <button class="menu-item danger" id="clearAllBtn" title="Clear tasks in the current view" aria-label="Clear tasks in the current view">
+      <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+      <span>Delete</span>
+    </button>
+  </div>
+</nav>
 <div class="workspace">
   <div class="tracker">
     <div class="date"><span id="datePart"></span>, <span class="day-name" id="dayPart"></span><button class="return-link" id="returnBtn" hidden></button></div>
@@ -485,34 +591,6 @@ img,svg{max-width:100%}
       <button class="view-toggle-btn" id="headerMenuBtn" aria-label="Menu">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></svg>
       </button>
-<nav class="side-menu" id="sideMenu">
-  <button id="menuToggle" aria-label="Menu">
-    <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></svg>
-  </button>
-  <div class="menu-items">
-    <button class="menu-item active" id="homeBtn" title="Home">
-      <svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"></path><path d="M5 10v10h14V10"></path><path d="M10 20v-6h4v6"></path></svg>
-      <span>Home</span>
-    </button>
-    <button class="menu-item" id="notesBtn" title="Notes">
-      <svg viewBox="0 0 24 24"><path d="M15.5 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z"></path><path d="M15 3v6h6"></path><path d="M9 13h6"></path><path d="M9 17h4"></path></svg>
-      <span>Notes</span>
-    </button>
-    <button class="menu-item" id="exportBtn" title="Export all data to a .json backup file" aria-label="Export all data">
-      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-      <span>Export</span>
-    </button>
-    <button class="menu-item" id="importBtn" title="Import data from a .json backup file" aria-label="Import data">
-      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-      <span>Import</span>
-    </button>
-    <div class="menu-divider"></div>
-    <button class="menu-item danger" id="clearAllBtn" title="Clear tasks in the current view" aria-label="Clear tasks in the current view">
-      <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-      <span>Delete</span>
-    </button>
-  </div>
-</nav>
       <div class="stats stats-right"><span class="count" id="totalCount">0</span> total</div>
       <span class="view-context" id="viewContext"></span>
       <button class="auth-btn" id="authBtn">Sign Up</button>
@@ -557,6 +635,130 @@ img,svg{max-width:100%}
     <div class="self-planner-content" id="notesContent"></div>
   </div>
 
+  <!-- Dashboard: queue (raw until Today's plan fires AI) + today + summary -->
+  <div class="self-planner" id="dashboardPage" style="display:none;" hidden>
+    <div class="self-planner-header">
+      <button class="view-toggle-btn" id="dashboardMenuBtn" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></svg>
+      </button>
+      <h1 class="self-planner-title">Dashboard</h1>
+      <div class="self-planner-controls">
+        <button class="modal-btn export" id="todaysPlanBtn">Today's plan</button>
+      </div>
+    </div>
+    <div class="dash-grid" id="dashboardContent">
+      <section class="dash-card dash-tall">
+        <h3>Smart Queue</h3>
+        <div class="q-date-row"><span class="q-date" id="queueSub"></span><button class="q-today" id="queueToday">Today</button></div>
+        <div class="dash-body" id="queueList"></div>
+      </section>
+      <section class="dash-card">
+        <h3>Today</h3>
+        <div class="dash-sub" id="todaySub">Overview</div>
+        <div class="dash-body" id="todayBody"></div>
+      </section>
+      <section class="dash-card">
+        <h3>Summary</h3>
+        <div class="dash-sub" id="summarySub">Today's brief</div>
+        <div class="dash-body" id="summaryBody"></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Settings (sub-sidebar: Import/Export, API Key) -->
+  <div class="self-planner" id="settingsPage" style="display:none;" hidden>
+    <div class="self-planner-header">
+      <button class="view-toggle-btn" id="settingsMenuBtn" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></svg>
+      </button>
+      <h1 class="self-planner-title">Settings</h1>
+    </div>
+    <div class="settings-wrap">
+      <aside class="settings-side">
+        <button class="settings-topic active" data-stopic="io">Import / Export</button>
+        <button class="settings-topic" data-stopic="api">API Key</button>
+        <button class="settings-topic" data-stopic="res">Resources</button>
+        <button class="settings-topic" data-stopic="notif">Notifications</button>
+      </aside>
+      <div class="settings-main">
+        <section class="settings-pane active" data-spane="io">
+          <h3>Backup</h3>
+          <div class="dash-sub">Full backup (planner + self-improvement + notes + resources + AI cache), or import a backup or AI-made planner file.</div>
+          <div class="settings-row">
+            <button class="settings-btn primary" id="exportBtn">Export backup</button>
+            <button class="settings-btn" id="importBtn">Import file</button>
+          </div>
+        </section>
+        <section class="settings-pane" data-spane="api">
+          <h3>Groq API key</h3>
+          <div class="dash-sub">Powers AI chapter detection in check-in. Stored only in this browser — never synced.</div>
+          <div class="res-form-row" style="margin-top:12px"><label for="apiKeyInput">API key</label><input id="apiKeyInput" type="password" placeholder="gsk_..." autocomplete="off"></div>
+          <div class="key-ticks"><span id="tickFormat" class="tick">○ API key detected</span><span id="tickConn" class="tick">○ Connected</span></div>
+          <div class="checkin-msg" id="apiKeyMsg"></div>
+          <div class="settings-row">
+            <button class="settings-btn primary" id="apiKeySave">Verify &amp; Save</button>
+          </div>
+        </section>
+        <section class="settings-pane" data-spane="notif">
+          <h3>Notifications</h3>
+          <div class="dash-sub">Daily reminder at 6:00 AM sharp.</div>
+          <div class="settings-row">
+            <button class="settings-btn" id="notifToggle">Turn ON</button>
+          </div>
+          <div class="notif-status" id="notifStatus"></div>
+        </section>
+        <section class="settings-pane" data-spane="res">
+          <h3>Resources</h3>
+          <div class="dash-sub">Synced across devices. Links open in a new tab.</div>
+          <div id="resSettings" style="margin-top:12px">
+            <div class="res-subject subject-physics"><div class="res-subject-title">Physics</div><div id="resList-physics"></div><button class="dash-add" data-res-add="physics">+ Add</button></div>
+            <div class="res-subject subject-chemistry"><div class="res-subject-title">Chemistry</div><div id="resList-chemistry"></div><button class="dash-add" data-res-add="chemistry">+ Add</button></div>
+            <div class="res-subject subject-maths"><div class="res-subject-title">Maths</div><div id="resList-maths"></div><button class="dash-add" data-res-add="maths">+ Add</button></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Add Resource Modal (reuses modal-overlay pattern) -->
+<div class="modal-overlay" id="resModal" hidden>
+  <div class="modal-card">
+    <div class="modal-title" style="color:#fff">Add resource</div>
+    <div class="res-form-row">
+      <label for="resSubject">Subject</label>
+      <select id="resSubject">
+        <option value="chemistry">Chemistry</option>
+        <option value="maths">Maths</option>
+        <option value="physics">Physics</option>
+      </select>
+    </div>
+    <div class="res-form-row">
+      <label for="resName">Name</label>
+      <input id="resName" placeholder="e.g. HC Verma Solutions" autocomplete="off">
+    </div>
+    <div class="res-form-row">
+      <label for="resUrl">Link</label>
+      <input id="resUrl" placeholder="https://..." inputmode="url" autocomplete="off">
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn" id="resCancel">Cancel</button>
+      <button class="modal-btn export" id="resSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk Import Preview (reuses modal-overlay pattern) -->
+<div class="modal-overlay" id="bulkModal" hidden>
+  <div class="modal-card">
+    <div class="modal-title" style="color:#fff">Import plan</div>
+    <div id="bulkPreview" style="font-size:.82rem;color:#b6b6c4;line-height:1.6;margin-bottom:16px"></div>
+    <div class="modal-actions">
+      <button class="modal-btn" id="bulkCancel">Cancel</button>
+      <button class="modal-btn export" id="bulkConfirm">Add tasks</button>
+    </div>
+  </div>
 </div>
 
 <!-- Firebase Auth Modal (Sign Up / Sign In) -->
@@ -619,6 +821,7 @@ img,svg{max-width:100%}
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js"></script>
 <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
 <script>
 (() => {
@@ -675,6 +878,8 @@ img,svg{max-width:100%}
         if(user){
           $("authModal").classList.remove("show");
           setupFirestoreSync();
+          setupForegroundPush();
+          if(state.notifEnabled&&notifPermission()==="granted") registerFCMToken();
         } else {
           fbUnsubs.forEach(u=>{ try{u()}catch(e){} }); fbUnsubs=[];
         }
@@ -781,11 +986,27 @@ img,svg{max-width:100%}
         }
         if(Array.isArray(data.selfTasks) && data.selfTasks.length) state.selfImprovementTasks=data.selfTasks;
         if(Array.isArray(data.notesTasks) && data.notesTasks.length) state.notesTasks=data.notesTasks;
+        if(data.resources && typeof data.resources==="object"){
+          let hasRes=false;
+          SUBJECTS.forEach(s=>{ if(Array.isArray(data.resources[s]) && data.resources[s].length) hasRes=true; });
+          // ponytail: cloud wins only if it actually has resources — never wipe local-only adds
+          const localCount=SUBJECTS.reduce((n,s)=>n+(state.resources[s]||[]).length,0);
+          if(hasRes || localCount===0){
+            SUBJECTS.forEach(s=>{ if(Array.isArray(data.resources[s])) state.resources[s]=data.resources[s]; });
+            localStorage.setItem(RES_KEY, JSON.stringify(state.resources));
+          } else { pushToFirestore(); }
+        }
+        if(data.aiOrder||data.aiSummary) mergeAICache(data);
+        if(typeof data.notifEnabled==="boolean"&&data.notifEnabled!==state.notifEnabled){
+          state.notifEnabled=data.notifEnabled;
+          try{ localStorage.setItem(NOTIF_KEY,JSON.stringify(state.notifEnabled)); }catch(e){}
+          scheduleDaily(); refreshNotifUI();
+        }
         // also persist merged cloud data locally so refresh without network keeps it
         localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
         if(Array.isArray(data.selfTasks)) localStorage.setItem("selfImprovementTasks", JSON.stringify(data.selfTasks));
         if(Array.isArray(data.notesTasks)) localStorage.setItem("notesTasks", JSON.stringify(data.notesTasks));
-        render(); if(typeof renderSelfPlanner==="function" && $("selfPlanner").style.display!=="none") renderSelfPlanner(); if(typeof renderNotes==="function" && $("notesPage") && $("notesPage").style.display!=="none") renderNotes();
+        render(); if(typeof renderSelfPlanner==="function" && $("selfPlanner").style.display!=="none") renderSelfPlanner(); if(typeof renderNotes==="function" && $("notesPage") && $("notesPage").style.display!=="none") renderNotes(); if(typeof loadDashboard==="function" && $("dashboardPage") && $("dashboardPage").style.display!=="none") loadDashboard();
       }catch(e){ console.warn("Firestore parse failed",e); }
     }, err=>{ console.warn("Firestore sync error",err); });
     fbUnsubs.push(unsub);
@@ -798,6 +1019,10 @@ img,svg{max-width:100%}
         plannerState: JSON.stringify({ version:1, startDate:START_DATE, endDate:END_DATE, data:state.data, ui:{ activeTab:state.activeTab, views:state.views, selectedDate:state.selectedDate, selectedWeek:state.selectedWeek, selectedMonth:state.selectedMonth, calendarCursor:state.calendarCursor?dateKey(state.calendarCursor):null } }),
         selfTasks: state.selfImprovementTasks,
         notesTasks: state.notesTasks,
+        resources: state.resources,
+        aiOrder: state.aiOrder,
+        aiSummary: state.aiSummary,
+        notifEnabled: state.notifEnabled,
         email: fbUser.email,
         lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
       };
@@ -851,7 +1076,8 @@ img,svg{max-width:100%}
             if(Array.isArray(raw.data[level][k][s])) fresh[level][k][s]=raw.data[level][k][s].map(t=>({
               id:t.id ?? (Date.now()+Math.random()),
               text:String(t.text ?? ""),
-              completed:!!t.completed
+              completed:!!t.completed,
+              chapter:typeof t.chapter==="string"?t.chapter.slice(0,80):""
             })).filter(t=>t.text.trim());
           });
           if(level==="daily") fresh.daily[k].remark=String(raw.data[level][k].remark||"");
@@ -1248,7 +1474,7 @@ img,svg{max-width:100%}
   function addTask(level,key,subject,text){
     text=text.trim(); if(!text) return;
     if(!state.data[level][key]) state.data[level][key]={chemistry:[],maths:[],physics:[]};
-    state.data[level][key][subject].push({id:crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random(),text,completed:false});
+    state.data[level][key][subject].push({id:crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random(),text,completed:false,chapter:""});
     save(); render();
     showToast("Task added");
   }
@@ -1321,14 +1547,22 @@ img,svg{max-width:100%}
     const raw=localStorage.getItem(STORAGE_KEY);
     const selfTasks=localStorage.getItem("selfImprovementTasks");
     const notesTasks=localStorage.getItem("notesTasks");
+    const resRaw=localStorage.getItem(RES_KEY);
+    const aiQRaw=localStorage.getItem(AIQ_KEY);
+    const aiSRaw=localStorage.getItem(AIS_KEY);
+    const notifRaw=localStorage.getItem(NOTIF_KEY);
 
-    if(!raw && !selfTasks && !notesTasks){showToast("Nothing to export");return;}
-    
+    if(!raw && !selfTasks && !notesTasks && !resRaw && !aiQRaw && !aiSRaw && !notifRaw){showToast("Nothing to export");return;}
+
     // Create comprehensive backup with both planner and self-improvement data
     const backup={
       plannerData: raw ? JSON.parse(raw) : null,
       selfImprovementData: selfTasks ? JSON.parse(selfTasks) : [],
       notesData: notesTasks ? JSON.parse(notesTasks) : [],
+      resourcesData: resRaw ? JSON.parse(resRaw) : {chemistry:[],maths:[],physics:[]},
+      aiQueueData: aiQRaw ? JSON.parse(aiQRaw) : {},
+      aiSummaryData: aiSRaw ? JSON.parse(aiSRaw) : {},
+      notifData: notifRaw ? JSON.parse(notifRaw) : false,
       exportDate: new Date().toISOString(),
       version: 1
     };
@@ -1342,18 +1576,106 @@ img,svg{max-width:100%}
     showToast("Complete backup downloaded (planner + self-improvement + notes)");
   }
 
+  // ponytail: bulk task import — AI-generated {format:"planner-bulk-tasks"} merges in, never replaces
+  function sanitizeBulkText(t){
+    return String(t==null?"":t).replace(/^\s*```(?:json)?\s*/i,"").replace(/\s*```\s*$/,"").trim();
+  }
+  function validateBulk(parsed){
+    const errs=[], stats={days:0,tasks:0,skippedRange:0,per:{chemistry:0,maths:0,physics:0}};
+    if(!parsed||parsed.format!=="planner-bulk-tasks") return {ok:false,errs:["Not a planner bulk file"],stats};
+    const daily=parsed.daily||{};
+    const keys=Object.keys(daily);
+    if(!keys.length) return {ok:false,errs:["No daily entries found"],stats};
+    const dateRe=/^\d{4}-\d{2}-\d{2}$/;
+    keys.forEach(k=>{
+      if(!dateRe.test(k)){ errs.push("Bad date key: "+k); return; }
+      if(!inRange(parseKey(k))){ stats.skippedRange++; return; }
+      const b=daily[k]||{};
+      let dayCount=0;
+      SUBJECTS.forEach(s=>{
+        const arr=b[s];
+        if(arr===undefined) return;
+        if(!Array.isArray(arr)){ errs.push(k+" "+s+": not a list"); return; }
+        arr.forEach(t=>{ if(String(t==null?"":t).trim()){ dayCount++; stats.per[s]++; } });
+      });
+      if(dayCount){ stats.days++; stats.tasks+=dayCount; }
+    });
+    if(!stats.days) return {ok:false,errs:errs.length?errs:["No in-range tasks found"],stats};
+    if(stats.tasks>2000) return {ok:false,errs:["Too many tasks ("+stats.tasks+", cap 2000)"],stats};
+    return {ok:true,errs,stats};
+  }
+  function mergeBulk(parsed){
+    let added=0, dupes=0;
+    const newId=()=>crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random();
+    const mergeBucket=(tb,sb)=>{
+      SUBJECTS.forEach(s=>{
+        const arr=sb[s];
+        if(!Array.isArray(arr)) return;
+        const have=new Map((tb[s]||[]).map(t=>[t.text,t]));
+        arr.forEach(raw=>{
+          // ponytail: bulk items are strings today, {text,chapter} objects tomorrow — same merge
+          const o=(raw&&typeof raw==="object")?raw:{text:raw};
+          const text=String(o.text==null?"":o.text).trim();
+          const ch=typeof o.chapter==="string"?o.chapter.trim().slice(0,80):"";
+          if(!text) return;
+          const ex=have.get(text);
+          if(ex){ dupes++; if(ch&&!ex.chapter) ex.chapter=ch; return; } // backfill chapter on re-import
+          const nt={id:newId(),text,completed:false,chapter:ch};
+          tb[s].push(nt);
+          have.set(text,nt); added++;
+        });
+      });
+    };
+    Object.keys(parsed.daily||{}).forEach(k=>{
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(k)||!inRange(parseKey(k))) return;
+      if(!state.data.daily[k]) state.data.daily[k]={chemistry:[],maths:[],physics:[],remark:""};
+      mergeBucket(state.data.daily[k],parsed.daily[k]||{});
+      const rem=String((parsed.daily[k]||{}).remark||"").trim();
+      if(rem && !state.data.daily[k].remark) state.data.daily[k].remark=rem;
+    });
+    ["weekly","monthly"].forEach(level=>{
+      Object.keys(parsed[level]||{}).forEach(k=>{
+        if(!state.data[level][k]) return; // only known buckets — no stray keys
+        mergeBucket(state.data[level][k],parsed[level][k]||{});
+      });
+    });
+    return {added,dupes};
+  }
+  function renderBulkPreview(){
+    const box=$("bulkPreview");
+    if(!box||!state._bulk) return;
+    const v=state._bulk.validation, p=v.stats.per;
+    box.innerHTML=`<span class="bulk-stat">${v.stats.tasks} tasks</span> across <span class="bulk-stat">${v.stats.days} days</span><br>`+
+      `Chemistry: ${p.chemistry} · Maths: ${p.maths} · Physics: ${p.physics}`+
+      (v.stats.skippedRange?`<br><span class="bulk-warn">${v.stats.skippedRange} day(s) outside plan range will be skipped</span>`:"")+
+      v.errs.slice(0,4).map(e=>`<br><span class="bulk-warn">${escapeHtml(e)}</span>`).join("")+
+      `<br>Existing tasks are kept — exact duplicates are skipped.`;
+  }
   function importFile(file){
     const reader=new FileReader();
     reader.onload=async ()=>{
       try{
-        const parsed=JSON.parse(reader.result);
-        let plannerToPush=null, selfToPush=null, notesToPush=null;
+        const parsed=JSON.parse(sanitizeBulkText(reader.result));
+        // bulk task file? preview first, merge on confirm
+        if(parsed && parsed.format==="planner-bulk-tasks"){
+          const v=validateBulk(parsed);
+          if(!v.ok){ showToast(v.errs[0]||"Invalid bulk file"); return; }
+          state._bulk={parsed,validation:v};
+          renderBulkPreview();
+          $("bulkModal").hidden=false;
+          return;
+        }
+        let plannerToPush=null, selfToPush=null, notesToPush=null, resToPush=null, aiQToPush=null, aiSToPush=null;
         // Handle new format (with plannerData and selfImprovementData)
         if(parsed.version === 1 && parsed.plannerData){
           if(parsed.plannerData) localStorage.setItem(STORAGE_KEY,JSON.stringify(parsed.plannerData));
           if(parsed.selfImprovementData) localStorage.setItem("selfImprovementTasks",JSON.stringify(parsed.selfImprovementData));
           if(parsed.notesData) localStorage.setItem("notesTasks",JSON.stringify(parsed.notesData));
-          plannerToPush=parsed.plannerData; selfToPush=parsed.selfImprovementData||[]; notesToPush=parsed.notesData||state.notesTasks||[];
+          if(parsed.resourcesData) localStorage.setItem(RES_KEY,JSON.stringify(parsed.resourcesData));
+          if(parsed.aiQueueData) localStorage.setItem(AIQ_KEY,JSON.stringify(parsed.aiQueueData));
+          if(parsed.aiSummaryData) localStorage.setItem(AIS_KEY,JSON.stringify(parsed.aiSummaryData));
+          if(typeof parsed.notifData==="boolean") localStorage.setItem(NOTIF_KEY,JSON.stringify(parsed.notifData));
+          plannerToPush=parsed.plannerData; selfToPush=parsed.selfImprovementData||[]; notesToPush=parsed.notesData||state.notesTasks||[]; resToPush=parsed.resourcesData||null; aiQToPush=parsed.aiQueueData||null; aiSToPush=parsed.aiSummaryData||null;
         }
         // Handle old format (just planner data)
         else if(!parsed.version && parsed.data){
@@ -1370,6 +1692,9 @@ img,svg{max-width:100%}
               plannerState: JSON.stringify(plannerToPush),
               selfTasks: selfToPush,
               notesTasks: notesToPush,
+              resources: resToPush,
+              aiOrder: aiQToPush,
+              aiSummary: aiSToPush,
               email: fbUser.email,
               lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
             }, {merge:true});
@@ -1512,6 +1837,7 @@ img,svg{max-width:100%}
       deleteTask(row.dataset.level,row.dataset.key,row.dataset.subject,row.dataset.id);return;
     }
 
+
     const subj=e.target.closest(".mini-subject");
     if(subj){
       selectGridSubject(subj.closest(".plan-card").querySelector(".card-log"),subj.dataset.subject,true);
@@ -1545,6 +1871,10 @@ img,svg{max-width:100%}
   function handleKeydown(e){
     if(e.key==="Escape"){
       if(e.target.closest(".log-input")){dismissLog();return;}
+      const rm=$("resModal");
+      if(rm && !rm.hidden){ rm.hidden=true; return; }
+      const bm=$("bulkModal");
+      if(bm && !bm.hidden){ state._bulk=null; bm.hidden=true; return; }
     }
     if(e.key!=="Enter")return;
     const logInput=e.target.closest(".log-input");
@@ -1675,6 +2005,198 @@ img,svg{max-width:100%}
   function saveNotesTasks(){
     localStorage.setItem("notesTasks",JSON.stringify(state.notesTasks));
     pushToFirestore();
+  }
+
+  // ponytail: resources = {chemistry:[{id,name,url}], ...} — user-added only, no hardcoded URLs
+  const RES_KEY="plannerResources";
+  state.resources={chemistry:[],maths:[],physics:[]};
+  function loadResources(){
+    try{
+      const raw=JSON.parse(localStorage.getItem(RES_KEY)||"null");
+      if(raw) SUBJECTS.forEach(s=>{ if(Array.isArray(raw[s])) state.resources[s]=raw[s].filter(r=>r&&r.name&&r.url); });
+    }catch(e){ state.resources={chemistry:[],maths:[],physics:[]}; }
+  }
+  function saveResources(){
+    localStorage.setItem(RES_KEY,JSON.stringify(state.resources));
+    pushToFirestore();
+  }
+
+  // ponytail: AI result cache per day — {ids,at} / {text,at}; synced like everything else
+  const AIQ_KEY="aiQueueCache", AIS_KEY="aiSummaryCache";
+  state.aiOrder={};
+  state.aiSummary={};
+  function loadAICache(){
+    try{
+      const q=JSON.parse(localStorage.getItem(AIQ_KEY)||"null");
+      if(q&&typeof q==="object") state.aiOrder=q;
+    }catch(e){ state.aiOrder={}; }
+    try{
+      const s=JSON.parse(localStorage.getItem(AIS_KEY)||"null");
+      if(s&&typeof s==="object") state.aiSummary=s;
+    }catch(e){ state.aiSummary={}; }
+  }
+  function saveAICache(){
+    localStorage.setItem(AIQ_KEY,JSON.stringify(state.aiOrder));
+    localStorage.setItem(AIS_KEY,JSON.stringify(state.aiSummary));
+    pushToFirestore();
+  }
+  function mergeAICache(cloud){
+    if(!cloud||typeof cloud!=="object") return;
+    ["aiOrder","aiSummary"].forEach(k=>{
+      const c=cloud[k];
+      if(!c||typeof c!=="object") return;
+      Object.keys(c).forEach(d=>{
+        const mine=state[k][d], theirs=c[d];
+        if(theirs&&typeof theirs==="object"&&(!mine||(+theirs.at||0)>(+mine.at||0))) state[k][d]=theirs;
+      });
+    });
+    localStorage.setItem(AIQ_KEY,JSON.stringify(state.aiOrder));
+    localStorage.setItem(AIS_KEY,JSON.stringify(state.aiSummary));
+  }
+
+  // ponytail: daily 6AM reminder — client-scheduled, SW-delivered, catch-up on late open
+  const NOTIF_KEY="notifEnabled", NOTIF_SHOWN_KEY="notifShownDate";
+  state.notifEnabled=false;
+  state._notifTimer=null;
+  function notifSupported(){ return ("Notification" in window); }
+  function notifPermission(){ return notifSupported()?Notification.permission:"denied"; }
+  function loadNotif(){
+    try{ state.notifEnabled=JSON.parse(localStorage.getItem(NOTIF_KEY)||"false")===true; }
+    catch(e){ state.notifEnabled=false; }
+  }
+  function saveNotif(){
+    localStorage.setItem(NOTIF_KEY,JSON.stringify(state.notifEnabled));
+    pushToFirestore();
+  }
+  // ponytail: pure — ms from `now` to next 06:00 local; testable
+  function msUntil6AM(now){
+    const n=new Date(now.getTime());
+    const t=new Date(n);
+    t.setHours(6,0,0,0);
+    if(t.getTime()<=n.getTime()) t.setDate(t.getDate()+1);
+    return t.getTime()-n.getTime();
+  }
+  function showDailyNotif(){
+    const title="Check Todays Plan", opts={body:"Tap to open your planner.",tag:"jee-daily",requireInteraction:true};
+    try{
+      if(navigator.serviceWorker&&navigator.serviceWorker.controller){
+        navigator.serviceWorker.ready.then(reg=>reg.showNotification(title,opts)).catch(()=>{ new Notification(title,opts); });
+      } else new Notification(title,opts);
+    }catch(e){ try{ new Notification(title,opts); }catch(e2){} }
+    try{ localStorage.setItem(NOTIF_SHOWN_KEY,dateKey(new Date())); }catch(e){}
+  }
+  function fireDaily(){
+    if(!state.notifEnabled||notifPermission()!=="granted") return;
+    showDailyNotif();
+    scheduleDaily();
+  }
+  function scheduleDaily(){
+    if(state._notifTimer){ clearTimeout(state._notifTimer); state._notifTimer=null; }
+    if(!state.notifEnabled||notifPermission()!=="granted") return;
+    const ms=msUntil6AM(new Date());
+    if(ms>2147483647) return;
+    state._notifTimer=setTimeout(fireDaily,ms);
+  }
+  function catchUpNotif(){
+    if(!state.notifEnabled||notifPermission()!=="granted") return;
+    let shown="";
+    try{ shown=localStorage.getItem(NOTIF_SHOWN_KEY)||""; }catch(e){}
+    const now=new Date(), today=dateKey(now);
+    if(shown===today) return;
+    if(now.getHours()<6) return;
+    showDailyNotif();
+  }
+  function notifStatusText(){
+    if(!notifSupported()) return "Notifications aren't supported in this browser.";
+    const p=notifPermission();
+    if(p==="denied") return "Permission is blocked. Allow notifications for this site in browser settings, then turn ON again.";
+    if(p==="default") return "Turn ON to request permission, then a reminder fires daily at 6:00 AM.";
+    if(!state.notifEnabled) return "OFF. Turn ON for a daily 6:00 AM reminder.";
+    let extra="";
+    try{
+      const ms=msUntil6AM(new Date()), h=Math.floor(ms/3600000), m=Math.round(ms%3600000/60000);
+      extra=` Next reminder in ${h}h ${m}m.`;
+    }catch(e){}
+    return "ON. Reminder fires daily at 6:00 AM."+extra;
+  }
+  function refreshNotifUI(){
+    const btn=$("notifToggle"), st=$("notifStatus");
+    if(btn){
+      const on=state.notifEnabled&&notifPermission()==="granted";
+      btn.textContent=on?"Turn OFF":"Turn ON";
+      btn.classList.toggle("on",on);
+    }
+    if(st) st.textContent=notifStatusText();
+  }
+  async function setNotifEnabled(on){
+    if(on){
+      if(!notifSupported()){ showToast("Notifications not supported here"); refreshNotifUI(); return; }
+      let p=notifPermission();
+      if(p==="default"){ try{ p=await Notification.requestPermission(); }catch(e){} }
+      if(p!=="granted"){ state.notifEnabled=false; saveNotif(); refreshNotifUI(); showToast("Permission not granted"); return; }
+      state.notifEnabled=true;
+      saveNotif(); refreshNotifUI(); scheduleDaily(); catchUpNotif();
+      registerFCMToken().then(ok=>{ if(!ok) console.warn("FCM token not registered — server push unavailable, local reminder still works"); });
+      showToast("Daily 6 AM reminder ON");
+    } else {
+      state.notifEnabled=false;
+      if(state._notifTimer){ clearTimeout(state._notifTimer); state._notifTimer=null; }
+      saveNotif(); refreshNotifUI();
+      showToast("Reminder OFF");
+    }
+  }
+  function registerSW(){
+    try{
+      if(!("serviceWorker" in navigator)) return;
+      if(!/^https?:$/.test(location.protocol)) return; // SW needs http(s); file:// falls back to page notifications
+      navigator.serviceWorker.register("sw.js").catch(e=>console.warn("SW register failed",e));
+    }catch(e){}
+  }
+  // ponytail: FCM server push — token per device stored on the user doc; local reminder stays as fallback
+  // PASTE #1: your Web Push public key (Firebase console → Project settings → Cloud Messaging → Web Push certificates)
+  const VAPID_PUBLIC_KEY="BKE--LG-LTO2OyCi8uZ0YZRekoi7YNqdn-hIyTh2rheg2y12wnVZxq4lYqObYSFb9PSLzOe3nUESpke_gUNOYZA";
+  const FCM_DEVICE_KEY="fcmDeviceId";
+  function vapidReady(){ return VAPID_PUBLIC_KEY&&!VAPID_PUBLIC_KEY.includes("PASTE"); }
+  // ponytail: pure map merge — one entry per device; testable
+  function mergeFcmToken(cur,dev,token){
+    const out={...(cur||{})};
+    if(dev&&token) out[dev]=token;
+    return out;
+  }
+  async function registerFCMToken(){
+    try{
+      if(!fbUser||!fbDb) return false;
+      if(notifPermission()!=="granted") return false;
+      if(typeof firebase==="undefined"||!firebase.messaging) return false;
+      if(!("serviceWorker" in navigator)) return false;
+      if(!vapidReady()){ console.warn("VAPID key missing — paste it at VAPID_PUBLIC_KEY"); return false; }
+      const reg=await navigator.serviceWorker.ready;
+      const token=await firebase.messaging().getToken({vapidKey:VAPID_PUBLIC_KEY,serviceWorkerRegistration:reg});
+      if(!token) return false;
+      let dev="";
+      try{
+        dev=localStorage.getItem(FCM_DEVICE_KEY)||"";
+        if(!dev){ dev=crypto.randomUUID?crypto.randomUUID():"dev-"+Date.now(); localStorage.setItem(FCM_DEVICE_KEY,dev); }
+      }catch(e){ dev="dev-"+Date.now(); }
+      const ref=fbDb.collection("users").doc(fbUser.uid);
+      const snap=await ref.get().catch(()=>null);
+      const cur=(snap&&snap.exists&&(snap.data().fcmTokens||{}))||{};
+      if(cur[dev]===token) return true;
+      await ref.set({fcmTokens:mergeFcmToken(cur,dev,token),lastUpdated:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+      return true;
+    }catch(e){ console.warn("FCM token failed",e); return false; }
+  }
+  function setupForegroundPush(){
+    if(state._fgPush) return;
+    try{
+      if(typeof firebase==="undefined"||!firebase.messaging) return;
+      state._fgPush=true;
+      firebase.messaging().onMessage(payload=>{
+        const n=(payload&&payload.notification)||{};
+        showToast(n.title||"Check Todays Plan");
+        try{ new Notification(n.title||"Check Todays Plan",{body:n.body||"Tap to open your planner.",tag:"jee-daily",requireInteraction:true}); }catch(e){}
+      });
+    }catch(e){}
   }
 
   function autoResize(el){
@@ -1983,7 +2505,7 @@ img,svg{max-width:100%}
     if(tog){ tog.checked=state.notesReorderEnabled; $("notesReorderLabel").classList.toggle("active",state.notesReorderEnabled); }
   }
 
-  // ponytail: single router for home/self/notes — header-row stays only on home
+  // ponytail: single router for home/self/notes/dashboard — header-row stays only on home
   function showView(name){
     state.currentView=name;
     const tracker=document.querySelector(".tracker");
@@ -1991,22 +2513,310 @@ img,svg{max-width:100%}
     const content=$("content");
     const self=$("selfPlanner");
     const notes=$("notesPage");
+    const dash=$("dashboardPage");
+    const settings=$("settingsPage");
     const home=name==="home";
     if(tracker) tracker.hidden=!home;
     if(headerRow) headerRow.hidden=!home;
     if(content) content.hidden=!home;
     if(self){ self.hidden=name!=="self"; self.style.display=name==="self"?"flex":"none"; }
     if(notes){ notes.hidden=name!=="notes"; notes.style.display=name==="notes"?"flex":"none"; }
-    const homeBtn=$("homeBtn"), notesBtn=$("notesBtn");
+    if(dash){ dash.hidden=name!=="dashboard"; dash.style.display=name==="dashboard"?"flex":"none"; }
+    if(settings){ settings.hidden=name!=="settings"; settings.style.display=name==="settings"?"flex":"none"; }
+    const homeBtn=$("homeBtn"), notesBtn=$("notesBtn"), dashBtn=$("dashboardBtn"), settingsBtn=$("settingsBtn");
     if(homeBtn) homeBtn.classList.toggle("active",name==="home");
     if(notesBtn) notesBtn.classList.toggle("active",name==="notes");
+    if(dashBtn) dashBtn.classList.toggle("active",name==="dashboard");
+    if(settingsBtn) settingsBtn.classList.toggle("active",name==="settings");
     if(name==="self"){ loadSelfTasks(); renderSelfPlanner(); }
     if(name==="notes"){ const nm=$("notesMenu"); if(nm) nm.hidden=true; loadNotesTasks(); renderNotes(); }
+    if(name==="dashboard"){ if(typeof loadDashboard==="function") loadDashboard(); }
+    if(name==="settings"){ if(typeof paintTicks==="function") paintTicks(); if(typeof renderResources==="function") renderResources(); if(typeof refreshNotifUI==="function") refreshNotifUI(); }
     if(home){ state._gridGotoCurrent=true; render(); }
     const menu=$("sideMenu");
     if(menu && window.innerWidth<=700) menu.classList.remove("open");
   }
 
+  // ponytail: dashboard renders cache-or-raw instantly; Today's plan button fires the AI
+  function loadDashboard(){
+    loadResources();
+    loadAICache();
+    renderResources();
+    renderQueue();
+    renderToday();
+    renderSummary();
+  }
+  function renderQueue(){
+    const list=$("queueList"), sub=$("queueSub");
+    if(!list) return;
+    const key=state.selectedDate;
+    if(sub) sub.textContent=formatDate(parseKey(key))+(key===getTodayKey()?" · today":"");
+    const items=dayTasks(key);
+    if(!items.length){ list.innerHTML="No tasks for this day. Add them from Home."; return; }
+    // raw until fired: cached AI order when present, stored order otherwise
+    const cached=state.aiOrder[key];
+    const ordered=cached&&Array.isArray(cached.ids)?applyAIOrder(items,cached.ids):items;
+    const why=(cached&&cached.why)||{};
+    const rank={}; let n=0;
+    ordered.forEach(o=>{ if(!o.t.completed) rank[String(o.t.id)]=++n; });
+    list.innerHTML=ordered.map((o)=>{
+      const w=!o.t.completed&&why[String(o.t.id)];
+      return `<div class="q-item subject-${o.s}${o.t.completed?" done":""}"><span class="q-check${o.t.completed?" done":""}" data-q-id="${o.t.id}" data-q-subject="${o.s}" role="checkbox" aria-checked="${o.t.completed}"></span><div class="q-main"><div class="q-text">${escapeHtml(o.t.text)}</div>${w?`<div class="q-why">#${rank[String(o.t.id)]} · ${escapeHtml(w)}</div>`:""}</div><span class="q-badge">${SUBJECT_SHORT[o.s]}</span></div>`;
+    }).join("");
+  }
+  function renderSummary(){
+    const el=$("summaryBody"), sub=$("summarySub");
+    if(!el) return;
+    const key=state.selectedDate;
+    if(sub) sub.textContent=formatDate(parseKey(key))+(key===getTodayKey()?" · today":"");
+    const cached=state.aiSummary[key];
+    if(cached&&cached.text){
+      el.innerHTML=`<div style="font-size:.88rem;line-height:1.6;color:#d0d0da">${escapeHtml(cached.text)}</div>`;
+      return;
+    }
+    el.innerHTML=`<div class="checkin-center">Tap Today's plan to generate the brief.</div>`;
+  }
+  function renderToday(){
+    const el=$("todayBody"), sub=$("todaySub");
+    if(!el) return;
+    const key=state.selectedDate, items=dayTasks(key);
+    if(sub) sub.textContent=formatDate(parseKey(key))+(key===getTodayKey()?" · today":"");
+    const done=items.filter(({t})=>t.completed).length;
+    const mins=items.filter(({t})=>!t.completed).reduce((n,{t})=>n+parseMinutes(t.text),0);
+    const tm=String(((state.data.daily[key]||{}).remark)||"").match(/daily target:\s*([^\n]+)/i);
+    const pct=items.length?Math.round(done/items.length*100):0;
+    el.innerHTML=`<div class="today-row"><span>Target</span><b>${tm?escapeHtml(tm[1].trim()):"—"}</b></div>`
+      +`<div class="today-row"><span>Planned</span><b>${Math.floor(mins/60)}h ${mins%60}m pending</b></div>`
+      +`<div class="today-row"><span>Done</span><b>${done}/${items.length} · ${pct}%</b></div>`;
+  }
+  function renderResources(){
+    SUBJECTS.forEach(s=>{
+      const list=$("resList-"+s);
+      if(!list) return;
+      const items=state.resources[s]||[];
+      list.innerHTML=items.length?items.map(r=>`<div class="res-item"><a href="${escapeHtml(r.url)}" target="_blank" rel="noopener">${escapeHtml(r.name)}</a><button class="res-del" data-res-subject="${s}" data-res-id="${r.id}" aria-label="Delete resource">×</button></div>`).join(""):`<div style="font-size:.8rem;color:#5b5b6e">No resources yet.</div>`;
+    });
+  }
+  function openResModal(subject){
+    const m=$("resModal");
+    if(!m) return;
+    $("resName").value=""; $("resUrl").value="";
+    if(subject) $("resSubject").value=subject;
+    m.hidden=false;
+    setTimeout(()=>$("resName").focus(),30);
+  }
+  // ponytail: chapter tagging — stored task.chapter first, regex guess fallback, Groq fills gaps on demand
+  const GROQ_KEY="groqKey";
+  function dayTasks(key){
+    const bucket=state.data.daily[key]||{};
+    const out=[];
+    SUBJECTS.forEach(s=>{(bucket[s]||[]).forEach(t=>out.push({s,t}))});
+    return out;
+  }
+  function parseMinutes(text){ const m=String(text||"").match(/^\s*(\d+)\s*min/i); return m?parseInt(m[1],10):30; }
+  // ponytail: key health — format tick, then free models call; Detect requires a verified key
+  const GROQ_OK_KEY="groqVerified";
+  function groqKey(){ return (localStorage.getItem(GROQ_KEY)||"").trim(); }
+  function isGroqVerified(){
+    try{ return !!JSON.parse(localStorage.getItem(GROQ_OK_KEY)||"null").ok; }catch(e){ return false; }
+  }
+  async function verifyGroqKey(){
+    const apiKey=groqKey();
+    if(!/^gsk_[A-Za-z0-9]+$/.test(apiKey)) return {ok:false,reason:"format"};
+    let n=0;
+    try{
+      const ctrl=new AbortController();
+      const timer=setTimeout(()=>ctrl.abort(),15000);
+      const res=await fetch("https://api.groq.com/openai/v1/models",{signal:ctrl.signal,headers:{"Authorization":"Bearer "+apiKey}});
+      clearTimeout(timer);
+      if(!res.ok) return {ok:false,reason:"rejected"};
+      const data=await res.json();
+      n=Array.isArray(data.data)?data.data.length:0;
+    }catch(e){ return {ok:false,reason:"network"}; }
+    // ponytail: listing models proves little — verify the exact chat POST path Today's plan uses
+    try{
+      const c2=new AbortController();
+      const t2=setTimeout(()=>c2.abort(),20000);
+      const r2=await fetch("https://api.groq.com/openai/v1/chat/completions",{
+        method:"POST",signal:c2.signal,
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+apiKey},
+        body:JSON.stringify({model:"openai/gpt-oss-20b",temperature:0,max_tokens:16,messages:[{role:"user",content:'Reply with exactly: {"ping":"ok"}'}]})
+      });
+      clearTimeout(t2);
+      if(!r2.ok) return {ok:false,reason:"chat",status:r2.status};
+      await r2.json();
+      localStorage.setItem(GROQ_OK_KEY,JSON.stringify({ok:true,at:Date.now(),models:n}));
+      return {ok:true,models:n,chat:true};
+    }catch(e){ return {ok:false,reason:"chat",detail:String((e&&e.message)||e)}; }
+  }
+  // ponytail: reasoning models chatter + truncate — scan every balanced {...}, prefer one holding wantKey
+  function extractAIJson(text,wantKey){
+    const clean=String(text||"").replace(/^\s*```(?:json)?\s*/i,"").replace(/\s*```\s*$/,"");
+    const spans=[];
+    for(let i=0;i<clean.length;i++){
+      if(clean[i]!=="{") continue;
+      let depth=0,inStr=false,esc=false;
+      for(let j=i;j<clean.length;j++){
+        const c=clean[j];
+        if(inStr){ if(esc) esc=false; else if(c==="\\") esc=true; else if(c==='"') inStr=false; }
+        else if(c==='"') inStr=true;
+        else if(c==="{") depth++;
+        else if(c==="}"){
+          depth--;
+          if(!depth){ spans.push(clean.slice(i,j+1)); break; }
+        }
+      }
+    }
+    let fallback=null;
+    for(const s of spans){
+      try{
+        const o=JSON.parse(s);
+        if(o&&typeof o==="object"){
+          if(wantKey&&Object.prototype.hasOwnProperty.call(o,wantKey)) return o;
+          if(!fallback) fallback=o;
+        }
+      }catch(e){}
+    }
+    if(wantKey) return fallback&&Object.keys(fallback).length?fallback:null;
+    try{ return JSON.parse(clean); }catch(e){}
+    return fallback;
+  }
+  // ponytail: classify, don't swallow — Groq logging zero calls means it died pre-network
+  function classifyGroqError(e){
+    const msg=String((e&&e.message)||e||"");
+    if(/abort/i.test((e&&e.name)||"")) return {kind:"timeout",text:"Request timed out (>25s). Tap Today's plan to retry."};
+    const hm=msg.match(/^HTTP (\d+)/);
+    if(hm){
+      const code=+hm[1];
+      if(code===401) return {kind:"auth",text:"Key rejected (401). Re-verify in Settings → API Key."};
+      if(code===429) return {kind:"rate",text:"Rate limited (429). Wait a minute, then retry."};
+      if(code>=500) return {kind:"server",text:`Groq server error (${code}). Retry in a bit.`};
+      return {kind:"http",text:`Groq error ${code}. Retry, or check F12 console.`};
+    }
+    if(msg==="unparseable") return {kind:"parse",text:"AI replied in the wrong format. Tap Today's plan to retry."};
+    if(msg==="empty-reply") return {kind:"parse",text:"AI replied empty. Tap Today's plan to retry."};
+    return {kind:"network",text:"Couldn't reach Groq — nothing reached their servers. Check connection, disable adblock for this page, or open the file over http(s) instead of file://. (F12 console has details.)"};
+  }
+  // ponytail: one shared Groq call — defensive parse, 25s cap, one retry on abort/network blips
+  async function callGroq(messages,temperature,maxTokens,retried){
+    const ctrl=new AbortController();
+    const timer=setTimeout(()=>ctrl.abort(),25000);
+    try{
+      const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{
+        method:"POST",signal:ctrl.signal,
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+groqKey()},
+        body:JSON.stringify({model:"openai/gpt-oss-20b",temperature,max_tokens:maxTokens,messages})
+      });
+      clearTimeout(timer);
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      const data=await res.json();
+      const content=data&&data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content;
+      if(!content) throw new Error("empty-reply");
+      const parsed=extractAIJson(content);
+      if(!parsed){ console.warn("Groq unparseable reply (first 400 chars):",String(content).slice(0,400)); throw new Error("unparseable"); }
+      return parsed;
+    }catch(e){
+      clearTimeout(timer);
+      console.warn("Groq call failed:",e&&e.name,e&&e.message);
+      if(!retried&&(e&&e.name==="AbortError")||(!retried&&e instanceof TypeError)) return callGroq(messages,temperature,maxTokens,true);
+      throw e;
+    }
+  }
+  function nextTest(key){
+    if(typeof testDates==="undefined") return null;
+    let best=null;
+    Object.keys(testDates).forEach(d=>{
+      const diff=(parseKey(d)-parseKey(key))/86400000;
+      if(diff>=0&&(!best||diff<best.days)) best={date:d,days:Math.round(diff),kind:testDates[d]};
+    });
+    return best;
+  }
+  function buildOrderPrompt(key,pending,remark,test){
+    return [
+      {role:"system",content:"You are a JEE study strategist. Rank tasks by marks-gained-per-minute (ROI): number them rank 1 (highest ROI) to N, highest first. Rules: foundational theory before its advanced practice; timed practice and mocks rise as the test nears; revision/review tasks slot between heavy blocks; logistics and planning tasks go last. Output ONLY one JSON object, no thinking text, no markdown, no fences: {\"order\":[{\"id\":\"...\",\"rank\":1,\"why\":\"under 8 words\"}]}. Include every input id exactly once."},
+      {role:"user",content:"Test: "+(test?`${test.kind} on ${test.date} (${test.days}d away)`:"none within 30 days")+"\nDay target: "+(remark||"—")+"\nTasks:\n"+pending.map(({s,t})=>"- ["+t.id+"] ("+s+") "+t.text).join("\n")}
+    ];
+  }
+  function buildSummaryPrompt(key,items,remark){
+    return [
+      {role:"system",content:"You write a pre-study brief for a JEE aspirant. Output ONLY one JSON object, no thinking text, no markdown, no fences: {\"summary\":\"...\"}. 40-50 words, second person, motivational but concrete: name the day's focus areas, the heaviest block, and the target. No greetings, no hashtags."},
+      {role:"user",content:`Date: ${key}\nTarget: ${remark||"—"}\nTasks:\n`+items.map(({s,t})=>`- (${s}) ${t.text}${t.completed?" (done)":""}`).join("\n")}
+    ];
+  }
+  // ponytail: honor explicit rank numbers when every item has one, else keep AI array order
+  function sortByRank(arr){
+    const list=(arr||[]).filter(o=>o&&o.id);
+    if(list.length&&list.every(o=>typeof o.rank==="number")) return list.slice().sort((a,b)=>a.rank-b.rank);
+    return list;
+  }
+  // ponytail: pure order math — AI ids first, unknown appended, completed sunk; testable
+  function sanitizeAIOrder(ids,validIds){
+    const valid=new Set(validIds.map(String)), seen=new Set(), out=[];
+    (ids||[]).forEach(id=>{ const k=String(id); if(valid.has(k)&&!seen.has(k)){ seen.add(k); out.push(k); } });
+    validIds.forEach(id=>{ const k=String(id); if(!seen.has(k)) out.push(k); });
+    return out;
+  }
+  function applyAIOrder(items,ids){
+    const rank={}; sanitizeAIOrder(ids,items.map(o=>o.t.id)).forEach((id,i)=>rank[String(id)]=i);
+    const pend=items.filter(o=>!o.t.completed).sort((a,b)=>rank[String(a.t.id)]-rank[String(b.t.id)]);
+    return pend.concat(items.filter(o=>o.t.completed));
+  }
+  function queueNote(html){ const l=$("queueList"); if(l) l.innerHTML=html; }
+  function summaryNote(html){ const b=$("summaryBody"); if(b) b.innerHTML=html; }
+  // ponytail: one button fires both AI calls in parallel; each can succeed alone
+  async function runTodaysPlan(){
+    const key=state.selectedDate;
+    const items=dayTasks(key);
+    const pending=items.filter(({t})=>!t.completed);
+    if(!pending.length){ showToast("No pending tasks for this day"); return; }
+    if(!groqKey()||!isGroqVerified()){
+      queueNote(`<div class="checkin-center" style="padding:12px 4px">AI ordering needs a verified key.<br>Add one in Settings → API Key, then tap Today's plan again.</div>`);
+      summaryNote(`<div class="checkin-center">Summary needs a verified key too.</div>`);
+      return;
+    }
+    const btn=$("todaysPlanBtn");
+    if(btn) btn.disabled=true;
+    queueNote(`<div class="checkin-center"><div class="spinner"></div><div>Arranging by ROI…</div></div>`);
+    summaryNote(`<div class="checkin-center"><div class="spinner"></div><div>Writing today's brief…</div></div>`);
+    const remark=String(((state.data.daily[key]||{}).remark)||"").slice(0,600);
+    const test=nextTest(key);
+    const [oRes,sRes]=await Promise.allSettled([
+      callGroq(buildOrderPrompt(key,pending,remark,test),0.3,4096),
+      callGroq(buildSummaryPrompt(key,items,remark),0.7,512)
+    ]);
+    let orderOk=false, sumOk=false, oErr=null, sErr=null;
+    if(oRes.status==="fulfilled"){
+      const arr=sortByRank(Array.isArray(oRes.value.order)?oRes.value.order:[]);
+      const why={};
+      arr.forEach(o=>{ if(o&&o.id&&typeof o.why==="string") why[String(o.id)]=o.why.slice(0,80); });
+      state.aiOrder[key]={ids:sanitizeAIOrder(arr.map(o=>o&&o.id).filter(Boolean),pending.map(({t})=>t.id)),why,at:Date.now()};
+      orderOk=state.aiOrder[key].ids.length>0;
+      if(!orderOk) oErr={kind:"empty",text:"AI returned an empty order. Tap Today's plan to retry."};
+    } else oErr=classifyGroqError(oRes.reason);
+    if(sRes.status==="fulfilled"){
+      const text=String(sRes.value.summary||"").trim().slice(0,600);
+      if(text){ state.aiSummary[key]={text,at:Date.now()}; sumOk=true; }
+      else sErr={kind:"empty",text:"AI returned an empty summary. Tap Today's plan to retry."};
+    } else sErr=classifyGroqError(sRes.reason);
+    if(orderOk||sumOk) saveAICache();
+    if(btn) btn.disabled=false;
+    renderQueue(); renderSummary();
+    if(!orderOk){
+      console.warn("Today's plan: order call failed",oRes.reason);
+      queueNote(`<div class="checkin-center" style="padding:12px 4px">${escapeHtml(oErr.text)}<br>Tap Today's plan to retry.</div>`);
+    }
+    if(!sumOk){
+      console.warn("Today's plan: summary call failed",sRes.reason);
+      summaryNote(`<div class="checkin-center">${escapeHtml(sErr.text)}<br>Tap Today's plan to retry.</div>`);
+    }
+    showToast(orderOk&&sumOk?"Today's plan ready":!orderOk&&!sumOk?`AI didn't respond (${oErr.kind})`:orderOk?"Order ready — summary failed":"Summary ready — order failed");
+  }
+  function paintTicks(){
+    const k=groqKey(), fmt=/^gsk_[A-Za-z0-9]+$/.test(k), ver=fmt&&isGroqVerified();
+    const tf=$("tickFormat"), tc=$("tickConn");
+    if(tf){ tf.textContent=(fmt?"✓ ":"○ ")+"API key detected"; tf.className="tick"+(fmt?" ok":""); }
+    if(tc){ tc.textContent=(ver?"✓ ":"○ ")+"Connected"; tc.className="tick"+(ver?" ok":""); }
+  }
   function toggleSelfPlanner(){
     if(!state.isAuthenticated){
       $("passwordModal").classList.add("show");
@@ -2107,12 +2917,92 @@ img,svg{max-width:100%}
     $("headerMenuBtn")?.addEventListener("click",()=>$("sideMenu").classList.toggle("open"));
     $("homeBtn")?.addEventListener("click",()=>showView("home"));
     $("notesBtn")?.addEventListener("click",()=>showView("notes"));
+    $("dashboardBtn")?.addEventListener("click",()=>showView("dashboard"));
+    $("dashboardMenuBtn")?.addEventListener("click",()=>$("sideMenu").classList.toggle("open"));
+    $("settingsBtn")?.addEventListener("click",()=>showView("settings"));
+    $("settingsMenuBtn")?.addEventListener("click",()=>$("sideMenu").classList.toggle("open"));
+    document.querySelectorAll(".settings-topic").forEach(t=>t.addEventListener("click",()=>{
+      document.querySelectorAll(".settings-topic").forEach(x=>x.classList.remove("active"));
+      document.querySelectorAll(".settings-pane").forEach(x=>x.classList.remove("active"));
+      t.classList.add("active");
+      document.querySelector(`[data-spane="${t.dataset.stopic}"]`)?.classList.add("active");
+    }));
+    $("apiKeyInput")?.addEventListener("input",()=>{ localStorage.removeItem(GROQ_OK_KEY); paintTicks(); });
+    $("apiKeySave")?.addEventListener("click",async ()=>{
+      const inp=$("apiKeyInput"), msg=$("apiKeyMsg");
+      const v=(inp?inp.value:"").trim();
+      if(v){ localStorage.setItem(GROQ_KEY,v); localStorage.removeItem(GROQ_OK_KEY); if(inp) inp.value=""; }
+      paintTicks();
+      if(!groqKey()){ if(msg) msg.textContent="Paste your key first."; return; }
+      if(msg) msg.textContent="Checking…";
+      const r=await verifyGroqKey();
+      paintTicks();
+      if(msg) msg.textContent=r.ok?`Connected${r.models?` (${r.models} models available)`:""} + chat OK. Today's plan will now use AI.`
+        :(r.reason==="format"?"That key format looks wrong — it should start with gsk_."
+        :r.reason==="chat"?`Key lists models, but chat POSTs don't go through${r.status?` (HTTP ${r.status})`:""}. Usual causes: adblock, firewall, or opening the file via file:// — try hosting over http(s).${r.detail?` Detail: ${r.detail}`:""}`
+        :"Key rejected or unreachable — check the key and connection.");
+    });
+    $("queueToday")?.addEventListener("click",()=>{
+      const t=getTodayKey();
+      state.selectedDate=inRange(parseKey(t))?t:clampDateKey(t);
+      state.selectedWeek=weekIndexForDate(state.selectedDate);
+      state.selectedMonth=getMonthKeyForDate(state.selectedDate);
+      save(); renderQueue(); renderToday(); renderSummary();
+    });
+    $("queueList")?.addEventListener("click",e=>{
+      const c=e.target.closest("[data-q-id]");
+      if(!c) return;
+      toggleTask("daily",state.selectedDate,c.dataset.qSubject,c.dataset.qId);
+      renderQueue(); renderToday();
+    });
+    $("todaysPlanBtn")?.addEventListener("click",()=>runTodaysPlan());
+    $("notifToggle")?.addEventListener("click",()=>{
+      const on=!($("notifToggle").classList.contains("on"));
+      setNotifEnabled(on);
+    });
+    document.addEventListener("visibilitychange",()=>{
+      if(!document.hidden){ scheduleDaily(); catchUpNotif(); refreshNotifUI(); }
+    });
+    document.querySelectorAll("[data-res-add]").forEach(b=>b.addEventListener("click",()=>openResModal(b.dataset.resAdd)));
+    $("resCancel")?.addEventListener("click",()=>{ $("resModal").hidden=true; });
+    $("resModal")?.addEventListener("click",e=>{ if(e.target.id==="resModal") $("resModal").hidden=true; });
+    $("resSave")?.addEventListener("click",()=>{
+      const s=$("resSubject").value, name=$("resName").value.trim();
+      let url=$("resUrl").value.trim();
+      if(!name||!url){ showToast("Enter name and link"); return; }
+      if(!/^https?:\/\//i.test(url)) url="https://"+url;
+      try{ new URL(url); }catch(e){ showToast("Invalid link"); return; }
+      state.resources[s].push({id:crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random(),name,url});
+      saveResources(); renderResources();
+      $("resModal").hidden=true;
+      showToast("Resource added");
+    });
+    $("resSettings")?.addEventListener("click",e=>{
+      const btn=e.target.closest("[data-res-id]");
+      if(!btn) return;
+      const s=btn.dataset.resSubject, id=btn.dataset.resId;
+      state.resources[s]=(state.resources[s]||[]).filter(r=>String(r.id)!==String(id));
+      saveResources(); renderResources();
+      showToast("Resource deleted");
+    });
+
+    $("bulkCancel")?.addEventListener("click",()=>{ state._bulk=null; $("bulkModal").hidden=true; });
+    $("bulkModal")?.addEventListener("click",e=>{ if(e.target.id==="bulkModal"){ state._bulk=null; $("bulkModal").hidden=true; } });
+    $("bulkConfirm")?.addEventListener("click",()=>{
+      if(!state._bulk) return;
+      const r=mergeBulk(state._bulk.parsed);
+      state._bulk=null;
+      $("bulkModal").hidden=true;
+      save(); render(); // save() pushes to Firestore when signed in
+      if(state.currentView==="dashboard"&&typeof loadDashboard==="function") loadDashboard();
+      showToast(r.added?`Added ${r.added} tasks${r.dupes?`, skipped ${r.dupes} duplicates`:""}`:`No new tasks${r.dupes?` — ${r.dupes} already present`:""}`);
+    });
     $("notesMenuBtn")?.addEventListener("click",()=>{ const nm=$("notesMenu"); if(nm) nm.hidden=!nm.hidden; });
     $("notesHomeBtn")?.addEventListener("click",()=>{ const nm=$("notesMenu"); if(nm) nm.hidden=true; showView("home"); });
     // ponytail: collapse expanded mobile menu on outside tap
     document.addEventListener("click",e=>{
       const menu=$("sideMenu");
-      if(menu && menu.classList.contains("open") && !e.target.closest("#sideMenu,#headerMenuBtn")) menu.classList.remove("open");
+      if(menu && menu.classList.contains("open") && !e.target.closest("#sideMenu,#headerMenuBtn,#dashboardMenuBtn,#settingsMenuBtn")) menu.classList.remove("open");
       const nm=$("notesMenu");
       if(nm && !nm.hidden && !e.target.closest("#notesMenu,#notesMenuBtn")) nm.hidden=true;
     });
@@ -2139,9 +3029,15 @@ img,svg{max-width:100%}
     // Add keyboard shortcut listener
     document.addEventListener("keydown",handleSelfPlannerShortcut);
     
-    // Load saved self-improvement + notes tasks
+    // Load saved self-improvement + notes tasks + resources + AI cache + notif pref
     loadSelfTasks();
     loadNotesTasks();
+    loadResources();
+    loadAICache();
+    loadNotif();
+    registerSW();
+    scheduleDaily();
+    catchUpNotif();
 
     render();
     markTestDates();
