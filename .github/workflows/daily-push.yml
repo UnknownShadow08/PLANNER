@@ -1,0 +1,64 @@
+name: Daily 6AM Push Notification
+
+on:
+  schedule:
+    - cron: '30 0 * * *'   # 00:30 UTC = 06:00 IST
+  workflow_dispatch:       # manual "Run workflow" button for testing
+
+jobs:
+  send-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - run: npm init -y && npm install firebase-admin
+
+      - name: Send notification
+        run: |
+          node -e "
+            const admin = require('firebase-admin');
+            admin.initializeApp({
+              credential: admin.credential.cert({
+                projectId: process.env.FIREBASE_PROJECT_ID,
+                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                privateKey: process.env.FIREBASE_SERVICE_KEY.replace(/\\\\n/g, '\n')
+              })
+            });
+            const URL = process.env.PLANNER_URL || './';
+            (async () => {
+              const db = admin.firestore();
+              const snap = await db.collection('users').get();
+              const owners = [];
+              snap.forEach(d => {
+                const toks = (d.data() && d.data().fcmTokens) || {};
+                Object.keys(toks).forEach(dev => { if (toks[dev]) owners.push({ ref: d.ref, dev: dev, token: toks[dev] }); });
+              });
+              if (!owners.length) { console.log('No tokens found'); return; }
+              const res = await admin.messaging().sendEachForMulticast({
+                tokens: owners.map(o => o.token),
+                notification: { title: 'Check Todays Plan', body: 'Tap to open your planner.' },
+                data: { url: URL }
+              });
+              console.log('Sent: ' + res.successCount + ', failed: ' + res.failureCount);
+              for (let i = 0; i < res.responses.length; i++) {
+                const r = res.responses[i];
+                if (!r.success && r.error && (r.error.code === 'messaging/registration-token-not-registered' || r.error.code === 'messaging/invalid-argument')) {
+                  const o = owners[i];
+                  try {
+                    const doc = await o.ref.get();
+                    const toks = ((doc.data() || {}).fcmTokens) || {};
+                    if (toks[o.dev]) { delete toks[o.dev]; await o.ref.update({ fcmTokens: toks }); console.log('Pruned dead token for ' + o.ref.id); }
+                  } catch (e) { console.warn('Prune failed: ' + e.message); }
+                }
+              }
+            })().catch(e => { console.error(e); process.exit(1); });
+          "
+        env:
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FIREBASE_SERVICE_KEY: ${{ secrets.FIREBASE_SERVICE_KEY }}
+          PLANNER_URL: ${{ vars.PLANNER_URL }}
