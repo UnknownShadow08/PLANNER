@@ -706,6 +706,7 @@ img,svg{max-width:100%}
             <button class="settings-btn" id="notifToggle">Turn ON</button>
           </div>
           <div class="notif-status" id="notifStatus"></div>
+          <div class="notif-status" id="pushDiag"></div>
         </section>
         <section class="settings-pane" data-spane="res">
           <h3>Resources</h3>
@@ -879,7 +880,7 @@ img,svg{max-width:100%}
           $("authModal").classList.remove("show");
           setupFirestoreSync();
           setupForegroundPush();
-          if(state.notifEnabled&&notifPermission()==="granted") registerFCMToken();
+          if(state.notifEnabled&&notifPermission()==="granted") registerFCMToken(true);
         } else {
           fbUnsubs.forEach(u=>{ try{u()}catch(e){} }); fbUnsubs=[];
         }
@@ -2136,7 +2137,7 @@ img,svg{max-width:100%}
       if(p!=="granted"){ state.notifEnabled=false; saveNotif(); refreshNotifUI(); showToast("Permission not granted"); return; }
       state.notifEnabled=true;
       saveNotif(); refreshNotifUI(); scheduleDaily(); catchUpNotif();
-      registerFCMToken().then(ok=>{ if(!ok) console.warn("FCM token not registered — server push unavailable, local reminder still works"); });
+      registerFCMToken(false).then(()=>refreshPushDiag());
       showToast("Daily 6 AM reminder ON");
     } else {
       state.notifEnabled=false;
@@ -2156,23 +2157,52 @@ img,svg{max-width:100%}
   // PASTE #1: your Web Push public key (Firebase console → Project settings → Cloud Messaging → Web Push certificates)
   const VAPID_PUBLIC_KEY="BKE--LG-LTO2OyCi8uZ0YZRekoi7YNqdn-hIyTh2rheg2y12wnVZxq4lYqObYSFb9PSLzOe3nUESpke_gUNOYZA";
   const FCM_DEVICE_KEY="fcmDeviceId";
-  function vapidReady(){ return VAPID_PUBLIC_KEY&&!VAPID_PUBLIC_KEY.includes("PASTE"); }
   // ponytail: pure map merge — one entry per device; testable
   function mergeFcmToken(cur,dev,token){
     const out={...(cur||{})};
     if(dev&&token) out[dev]=token;
     return out;
   }
-  async function registerFCMToken(){
+  // ponytail: pure VAPID check — 65-byte uncompressed EC key, base64url; testable
+  function validVapidKey(k){
+    try{
+      const s=String(k||"").trim();
+      if(!/^[A-Za-z0-9\-_]{80,100}$/.test(s)) return false;
+      const bin=atob(s.replace(/-/g,"+").replace(/_/g,"/"));
+      return bin.length===65&&bin.charCodeAt(0)===4;
+    }catch(e){ return false; }
+  }
+  function pushErrorText(e){
+    const code=String((e&&e.code)||"");
+    const msg=String((e&&e.message)||e||"");
+    console.warn("FCM token failed:",code||(e&&e.name),msg);
+    // ponytail: message+code beat name — Firebase throws push-service failures as AbortError
+    if(/push service|token-subscribe-failed|failed-serviceworker|subscription-failed/i.test(code+" "+msg)) return "Push subscription failed. Top causes: (1) VAPID key belongs to a different Firebase project — regenerate it under THIS project; (2) browser push blocked — try Chrome/Edge, turn off adblock/Shields, check firewall/VPN; (3) DevTools → Application → Service Workers must show an active worker.";
+    if(/permission-blocked|notifications-blocked|permission|denied|dismissed/i.test(code+" "+msg)) return "Notification permission not granted.";
+    const hm=msg.match(/^HTTP (\d+)/);
+    if(hm){
+      const c=+hm[1];
+      if(c===401) return "Key rejected (401). Re-verify in Settings → API Key.";
+      if(c===429) return "Rate limited (429). Wait a minute, then retry.";
+      return "Push setup failed (HTTP "+c+"). See F12 console.";
+    }
+    if(/abort/i.test((e&&e.name)||"")) return "Push request timed out. Retry.";
+    return "Push setup failed ("+(msg.slice(0,120)||"unknown error")+") — F12 console has details.";
+  }
+  async function registerFCMToken(quiet){
+    const fail=(t)=>{ if(!quiet&&t) showToast(t); return false; };
     try{
       if(!fbUser||!fbDb) return false;
-      if(notifPermission()!=="granted") return false;
-      if(typeof firebase==="undefined"||!firebase.messaging) return false;
-      if(!("serviceWorker" in navigator)) return false;
-      if(!vapidReady()){ console.warn("VAPID key missing — paste it at VAPID_PUBLIC_KEY"); return false; }
+      if(notifPermission()!=="granted") return fail("Notification permission not granted.");
+      if(typeof firebase==="undefined"||!firebase.messaging) return fail("Push library not loaded — reload the page.");
+      if(!("serviceWorker" in navigator)||!window.PushManager) return fail("Push not supported in this browser — try Chrome or Edge.");
+      try{ if(firebase.messaging.isSupported&&!firebase.messaging.isSupported()) return fail("Push not supported in this browser — try Chrome or Edge."); }catch(e){}
+      if(!validVapidKey(VAPID_PUBLIC_KEY)) return fail("VAPID key looks wrong — re-paste it with no extra spaces.");
       const reg=await navigator.serviceWorker.ready;
-      const token=await firebase.messaging().getToken({vapidKey:VAPID_PUBLIC_KEY,serviceWorkerRegistration:reg});
-      if(!token) return false;
+      if(!reg||!reg.active) return fail("Service worker not active yet — reload the page and retry.");
+      if(!reg.pushManager) return fail("Push manager unavailable in this browser.");
+      const token=await firebase.messaging().getToken({vapidKey:VAPID_PUBLIC_KEY.trim(),serviceWorkerRegistration:reg});
+      if(!token) return fail("Push service returned no token. Retry.");
       let dev="";
       try{
         dev=localStorage.getItem(FCM_DEVICE_KEY)||"";
@@ -2184,7 +2214,31 @@ img,svg{max-width:100%}
       if(cur[dev]===token) return true;
       await ref.set({fcmTokens:mergeFcmToken(cur,dev,token),lastUpdated:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
       return true;
-    }catch(e){ console.warn("FCM token failed",e); return false; }
+    }catch(e){ const t=pushErrorText(e); if(!quiet) showToast(t); return false; }
+  }
+  // ponytail: one-line self-diagnosis in Settings — SW state, permission, server visibility
+  async function refreshPushDiag(){
+    const el=$("pushDiag");
+    if(!el) return;
+    let sw="missing", tok="unknown";
+    try{
+      if("serviceWorker" in navigator){
+        const reg=await Promise.race([
+          navigator.serviceWorker.ready.catch(()=>null),
+          new Promise(res=>setTimeout(()=>res(null),5000))
+        ]);
+        sw=reg&&reg.active?"active":(reg?"starting":"missing");
+      }
+    }catch(e){}
+    try{
+      let dev=""; try{ dev=localStorage.getItem(FCM_DEVICE_KEY)||""; }catch(e){}
+      if(fbUser&&fbDb&&dev){
+        const snap=await fbDb.collection("users").doc(fbUser.uid).get().catch(()=>null);
+        const toks=(snap&&snap.exists&&(snap.data().fcmTokens||{}))||{};
+        tok=toks[dev]?"yes":"no";
+      } else tok="no";
+    }catch(e){ tok="unknown"; }
+    el.textContent=`Service worker: ${sw} · Permission: ${notifSupported()?notifPermission():"unsupported"} · Server sees this device: ${tok}`;
   }
   function setupForegroundPush(){
     if(state._fgPush) return;
@@ -2531,7 +2585,7 @@ img,svg{max-width:100%}
     if(name==="self"){ loadSelfTasks(); renderSelfPlanner(); }
     if(name==="notes"){ const nm=$("notesMenu"); if(nm) nm.hidden=true; loadNotesTasks(); renderNotes(); }
     if(name==="dashboard"){ if(typeof loadDashboard==="function") loadDashboard(); }
-    if(name==="settings"){ if(typeof paintTicks==="function") paintTicks(); if(typeof renderResources==="function") renderResources(); if(typeof refreshNotifUI==="function") refreshNotifUI(); }
+    if(name==="settings"){ if(typeof paintTicks==="function") paintTicks(); if(typeof renderResources==="function") renderResources(); if(typeof refreshNotifUI==="function") refreshNotifUI(); if(typeof refreshPushDiag==="function") refreshPushDiag(); }
     if(home){ state._gridGotoCurrent=true; render(); }
     const menu=$("sideMenu");
     if(menu && window.innerWidth<=700) menu.classList.remove("open");
@@ -2961,7 +3015,7 @@ img,svg{max-width:100%}
       setNotifEnabled(on);
     });
     document.addEventListener("visibilitychange",()=>{
-      if(!document.hidden){ scheduleDaily(); catchUpNotif(); refreshNotifUI(); }
+      if(!document.hidden){ scheduleDaily(); catchUpNotif(); refreshNotifUI(); refreshPushDiag(); }
     });
     document.querySelectorAll("[data-res-add]").forEach(b=>b.addEventListener("click",()=>openResModal(b.dataset.resAdd)));
     $("resCancel")?.addEventListener("click",()=>{ $("resModal").hidden=true; });
