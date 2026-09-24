@@ -704,6 +704,7 @@ img,svg{max-width:100%}
           <div class="dash-sub">Daily reminder at 6:00 AM sharp.</div>
           <div class="settings-row">
             <button class="settings-btn" id="notifToggle">Turn ON</button>
+            <button class="settings-btn" id="pushDiagBtn">Diagnose push</button>
           </div>
           <div class="notif-status" id="notifStatus"></div>
           <div class="notif-status" id="pushDiag"></div>
@@ -2172,6 +2173,17 @@ img,svg{max-width:100%}
       return bin.length===65&&bin.charCodeAt(0)===4;
     }catch(e){ return false; }
   }
+  // ponytail: pure base64url → bytes for raw pushManager probing; testable
+  function vapidToBytes(k){
+    try{
+      const s=String(k||"").trim().replace(/-/g,"+").replace(/_/g,"/");
+      const bin=atob(s);
+      if(!bin.length) return null;
+      const out=new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++) out[i]=bin.charCodeAt(i);
+      return out;
+    }catch(e){ return null; }
+  }
   function pushErrorText(e){
     const code=String((e&&e.code)||"");
     const msg=String((e&&e.message)||e||"");
@@ -2215,6 +2227,38 @@ img,svg{max-width:100%}
       await ref.set({fcmTokens:mergeFcmToken(cur,dev,token),lastUpdated:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
       return true;
     }catch(e){ const t=pushErrorText(e); if(!quiet) showToast(t); return false; }
+  }
+  // ponytail: deep diagnosis — raw subscribe isolates browser/project faults from Firebase faults
+  async function diagnosePush(){
+    const el=$("pushDiag");
+    if(el) el.textContent="Diagnosing push…";
+    const lines=[];
+    let reg=null;
+    try{ reg=await navigator.serviceWorker.ready; }catch(e){}
+    lines.push("SW: "+(reg&&reg.active?"active":"MISSING — reload the page"));
+    if(!reg||!reg.active){ if(el) el.textContent=lines.join(" · "); return; }
+    lines.push("permission: "+notifPermission());
+    try{
+      const ex=await reg.pushManager.getSubscription().catch(()=>null);
+      lines.push("existing subscription: "+(ex?"yes via "+((ex.endpoint||"").split("/")[2]||"?"):"none"));
+    }catch(e){ lines.push("existing subscription: unreadable"); }
+    const reach=async u=>{ try{ await fetch(u,{mode:"no-cors"}); return "reachable"; }catch(e){ return "BLOCKED"; } };
+    const bytes=vapidToBytes(VAPID_PUBLIC_KEY);
+    if(!bytes||bytes.length!==65){
+      lines.push("VAPID key malformed — re-paste it with no spaces");
+    } else {
+      try{
+        const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:bytes});
+        const host=((sub&&sub.endpoint)||"").split("/")[2]||"?";
+        lines.push("raw subscribe: OK via "+host+" (test subscription removed)");
+        try{ await sub.unsubscribe(); }catch(e){}
+        lines.push("fcm.googleapis.com: "+await reach("https://fcm.googleapis.com/fcm/send"));
+      }catch(e){
+        lines.push("raw subscribe FAILED: "+((e&&e.name)||"?")+" — "+String((e&&e.message)||e||"").slice(0,160));
+        lines.push("fcm.googleapis.com: "+await reach("https://fcm.googleapis.com/fcm/send"));
+      }
+    }
+    if(el) el.innerHTML=lines.map(l=>escapeHtml(l)).join("<br>");
   }
   // ponytail: one-line self-diagnosis in Settings — SW state, permission, server visibility
   async function refreshPushDiag(){
@@ -3014,6 +3058,7 @@ img,svg{max-width:100%}
       const on=!($("notifToggle").classList.contains("on"));
       setNotifEnabled(on);
     });
+    $("pushDiagBtn")?.addEventListener("click",()=>diagnosePush());
     document.addEventListener("visibilitychange",()=>{
       if(!document.hidden){ scheduleDaily(); catchUpNotif(); refreshNotifUI(); refreshPushDiag(); }
     });
