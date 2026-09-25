@@ -184,6 +184,7 @@ img,svg{max-width:100%}
 .subject-chemistry{--acc:#60a5fa;--acc-soft:#93c5fd;--acc-bg:rgba(96,165,250,.04);--acc-bd:rgba(96,165,250,.55);--acc-chk:#3b82f6}
 .subject-maths{--acc:#facc15;--acc-soft:#fcd866;--acc-bg:rgba(250,204,21,.04);--acc-bd:rgba(250,204,21,.55);--acc-chk:#d97706}
 .subject-physics{--acc:#fb7185;--acc-soft:#fca5a5;--acc-bg:rgba(248,113,113,.04);--acc-bd:rgba(248,113,113,.55);--acc-chk:#e11d48}
+.subject-extra{--acc:#9ca3af;--acc-soft:#d1d5db;--acc-bg:rgba(156,163,175,.04);--acc-bd:rgba(156,163,175,.55);--acc-chk:#6b7280}
 
 .subject-group{display:flex;align-items:stretch;gap:16px;margin-bottom:24px;padding-left:4px}
 .rail{
@@ -284,7 +285,7 @@ img,svg{max-width:100%}
 .day-num{font-weight:600;font-size:1.3rem}
 .cal-dots{position:absolute;left:6px;bottom:5px;display:flex;gap:2px}
 .cal-dot{width:4px;height:4px;border-radius:50%}
-.dot-c{background:#60a5fa}.dot-m{background:#facc15}.dot-p{background:#fb7185}
+.dot-c{background:#60a5fa}.dot-m{background:#facc15}.dot-p{background:#fb7185}.dot-e{background:#9ca3af}
 .day-mini{font-size:.56rem;color:#8a8a9e;margin-top:3px}
 .month-label{grid-column:1/-1;font-family:Manrope;font-weight:800;color:#c7c7d6;padding:6px 2px 2px}
 
@@ -716,6 +717,7 @@ img,svg{max-width:100%}
             <div class="res-subject subject-physics"><div class="res-subject-title">Physics</div><div id="resList-physics"></div><button class="dash-add" data-res-add="physics">+ Add</button></div>
             <div class="res-subject subject-chemistry"><div class="res-subject-title">Chemistry</div><div id="resList-chemistry"></div><button class="dash-add" data-res-add="chemistry">+ Add</button></div>
             <div class="res-subject subject-maths"><div class="res-subject-title">Maths</div><div id="resList-maths"></div><button class="dash-add" data-res-add="maths">+ Add</button></div>
+            <div class="res-subject subject-extra"><div class="res-subject-title">Extra</div><div id="resList-extra"></div><button class="dash-add" data-res-add="extra">+ Add</button></div>
           </div>
         </section>
       </div>
@@ -734,6 +736,7 @@ img,svg{max-width:100%}
         <option value="chemistry">Chemistry</option>
         <option value="maths">Maths</option>
         <option value="physics">Physics</option>
+        <option value="extra">Extra</option>
       </select>
     </div>
     <div class="res-form-row">
@@ -831,9 +834,9 @@ img,svg{max-width:100%}
   const START_DATE = "2026-08-13";
   const END_DATE = "2026-11-15";
   const TARGET_DATE = "2026-11-15";
-  const SUBJECTS = ["chemistry", "maths", "physics"];
-  const SUBJECT_LABELS = { chemistry:"Chemistry", maths:"Maths", physics:"Physics" };
-  const SUBJECT_SHORT = { chemistry:"CHEM", maths:"MATHS", physics:"PHY" };
+  const SUBJECTS = ["chemistry", "maths", "physics", "extra"];
+  const SUBJECT_LABELS = { chemistry:"Chemistry", maths:"Maths", physics:"Physics", extra:"Extra" };
+  const SUBJECT_SHORT = { chemistry:"CHEM", maths:"MATHS", physics:"PHY", extra:"EXTRA" };
   const DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
@@ -1059,11 +1062,11 @@ img,svg{max-width:100%}
     const end=parseKey(END_DATE);
     for(let d=new Date(parseKey(START_DATE)); d<=end; d.setDate(d.getDate()+1)){
       const k=dateKey(d);
-      daily[k]={chemistry:[],maths:[],physics:[],remark:""};
+      daily[k]={chemistry:[],maths:[],physics:[],extra:[],remark:""};
       const week=weekIndexForDate(k);
-      if(!weekly[week]) weekly[week]={chemistry:[],maths:[],physics:[]};
+      if(!weekly[week]) weekly[week]={chemistry:[],maths:[],physics:[],extra:[]};
       const month=k.slice(0,7);
-      if(!monthly[month]) monthly[month]={chemistry:[],maths:[],physics:[]};
+      if(!monthly[month]) monthly[month]={chemistry:[],maths:[],physics:[],extra:[]};
     }
     return {monthly,weekly,daily};
   }
@@ -1073,7 +1076,7 @@ img,svg{max-width:100%}
     if(raw && raw.data){
       ["monthly","weekly","daily"].forEach(level=>{
         if(raw.data[level]) Object.keys(raw.data[level]).forEach(k=>{
-          if(!fresh[level][k]) fresh[level][k]=(level==="daily"?{chemistry:[],maths:[],physics:[],remark:""}:{chemistry:[],maths:[],physics:[]});
+          if(!fresh[level][k]) fresh[level][k]=(level==="daily"?{chemistry:[],maths:[],physics:[],extra:[],remark:""}:{chemistry:[],maths:[],physics:[],extra:[]});
           SUBJECTS.forEach(s=>{
             if(Array.isArray(raw.data[level][k][s])) fresh[level][k][s]=raw.data[level][k][s].map(t=>({
               id:t.id ?? (Date.now()+Math.random()),
@@ -1475,7 +1478,7 @@ img,svg{max-width:100%}
 
   function addTask(level,key,subject,text){
     text=text.trim(); if(!text) return;
-    if(!state.data[level][key]) state.data[level][key]={chemistry:[],maths:[],physics:[]};
+    if(!state.data[level][key]) state.data[level][key]={chemistry:[],maths:[],physics:[],extra:[]};
     state.data[level][key][subject].push({id:crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random(),text,completed:false,chapter:""});
     save(); render();
     showToast("Task added");
@@ -1529,17 +1532,17 @@ img,svg{max-width:100%}
       const has=SUBJECTS.some(s=>b[s].length)||!!b.remark;
       if(!has)return false;
       if(!doClear)return true;
-      state.data.daily[state.selectedDate]={chemistry:[],maths:[],physics:[],remark:""}; message="Day cleared";
+      state.data.daily[state.selectedDate]={chemistry:[],maths:[],physics:[],extra:[],remark:""}; message="Day cleared";
     }else if(state.activeTab==="weekly"){
       const key=String(state.selectedWeek), b=state.data.weekly[key];
       if(!SUBJECTS.some(s=>b[s].length))return false;
       if(!doClear)return true;
-      state.data.weekly[key]={chemistry:[],maths:[],physics:[]}; message="Week cleared";
+      state.data.weekly[key]={chemistry:[],maths:[],physics:[],extra:[]}; message="Week cleared";
     }else{
       const key=state.selectedMonth, b=state.data.monthly[key];
       if(!SUBJECTS.some(s=>b[s].length))return false;
       if(!doClear)return true;
-      state.data.monthly[key]={chemistry:[],maths:[],physics:[]}; message="Month cleared";
+      state.data.monthly[key]={chemistry:[],maths:[],physics:[],extra:[]}; message="Month cleared";
     }
     save();render();showToast(message);
     return true;
@@ -1561,7 +1564,7 @@ img,svg{max-width:100%}
       plannerData: raw ? JSON.parse(raw) : null,
       selfImprovementData: selfTasks ? JSON.parse(selfTasks) : [],
       notesData: notesTasks ? JSON.parse(notesTasks) : [],
-      resourcesData: resRaw ? JSON.parse(resRaw) : {chemistry:[],maths:[],physics:[]},
+      resourcesData: resRaw ? JSON.parse(resRaw) : {chemistry:[],maths:[],physics:[],extra:[]},
       aiQueueData: aiQRaw ? JSON.parse(aiQRaw) : {},
       aiSummaryData: aiSRaw ? JSON.parse(aiSRaw) : {},
       notifData: notifRaw ? JSON.parse(notifRaw) : false,
@@ -1583,7 +1586,7 @@ img,svg{max-width:100%}
     return String(t==null?"":t).replace(/^\s*```(?:json)?\s*/i,"").replace(/\s*```\s*$/,"").trim();
   }
   function validateBulk(parsed){
-    const errs=[], stats={days:0,tasks:0,skippedRange:0,per:{chemistry:0,maths:0,physics:0}};
+    const errs=[], stats={days:0,tasks:0,skippedRange:0,per:{chemistry:0,maths:0,physics:0,extra:0}};
     if(!parsed||parsed.format!=="planner-bulk-tasks") return {ok:false,errs:["Not a planner bulk file"],stats};
     const daily=parsed.daily||{};
     const keys=Object.keys(daily);
@@ -1630,7 +1633,7 @@ img,svg{max-width:100%}
     };
     Object.keys(parsed.daily||{}).forEach(k=>{
       if(!/^\d{4}-\d{2}-\d{2}$/.test(k)||!inRange(parseKey(k))) return;
-      if(!state.data.daily[k]) state.data.daily[k]={chemistry:[],maths:[],physics:[],remark:""};
+      if(!state.data.daily[k]) state.data.daily[k]={chemistry:[],maths:[],physics:[],extra:[],remark:""};
       mergeBucket(state.data.daily[k],parsed.daily[k]||{});
       const rem=String((parsed.daily[k]||{}).remark||"").trim();
       if(rem && !state.data.daily[k].remark) state.data.daily[k].remark=rem;
@@ -1648,7 +1651,7 @@ img,svg{max-width:100%}
     if(!box||!state._bulk) return;
     const v=state._bulk.validation, p=v.stats.per;
     box.innerHTML=`<span class="bulk-stat">${v.stats.tasks} tasks</span> across <span class="bulk-stat">${v.stats.days} days</span><br>`+
-      `Chemistry: ${p.chemistry} · Maths: ${p.maths} · Physics: ${p.physics}`+
+      SUBJECTS.map(s=>`${SUBJECT_LABELS[s]}: ${p[s]||0}`).join(" · ")+
       (v.stats.skippedRange?`<br><span class="bulk-warn">${v.stats.skippedRange} day(s) outside plan range will be skipped</span>`:"")+
       v.errs.slice(0,4).map(e=>`<br><span class="bulk-warn">${escapeHtml(e)}</span>`).join("")+
       `<br>Existing tasks are kept — exact duplicates are skipped.`;
@@ -2011,12 +2014,12 @@ img,svg{max-width:100%}
 
   // ponytail: resources = {chemistry:[{id,name,url}], ...} — user-added only, no hardcoded URLs
   const RES_KEY="plannerResources";
-  state.resources={chemistry:[],maths:[],physics:[]};
+  state.resources={chemistry:[],maths:[],physics:[],extra:[]};
   function loadResources(){
     try{
       const raw=JSON.parse(localStorage.getItem(RES_KEY)||"null");
       if(raw) SUBJECTS.forEach(s=>{ if(Array.isArray(raw[s])) state.resources[s]=raw[s].filter(r=>r&&r.name&&r.url); });
-    }catch(e){ state.resources={chemistry:[],maths:[],physics:[]}; }
+    }catch(e){ state.resources={chemistry:[],maths:[],physics:[],extra:[]}; }
   }
   function saveResources(){
     localStorage.setItem(RES_KEY,JSON.stringify(state.resources));
@@ -2878,19 +2881,22 @@ img,svg{max-width:100%}
     summaryNote(`<div class="checkin-center"><div class="spinner"></div><div>Writing today's brief…</div></div>`);
     const remark=String(((state.data.daily[key]||{}).remark)||"").slice(0,600);
     const test=nextTest(key);
+    // ponytail: Extra is list-only — AI orders P/C/M, summary still covers the whole day
+    const orderable=pending.filter(({s})=>s!=="extra");
+    const orderSkipped=!orderable.length;
     const [oRes,sRes]=await Promise.allSettled([
-      callGroq(buildOrderPrompt(key,pending,remark,test),0.3,4096),
+      orderSkipped?Promise.resolve({_skipped:true}):callGroq(buildOrderPrompt(key,orderable,remark,test),0.3,4096),
       callGroq(buildSummaryPrompt(key,items,remark),0.7,512)
     ]);
     let orderOk=false, sumOk=false, oErr=null, sErr=null;
-    if(oRes.status==="fulfilled"){
+    if(oRes.status==="fulfilled"&&!oRes.value._skipped){
       const arr=sortByRank(Array.isArray(oRes.value.order)?oRes.value.order:[]);
       const why={};
       arr.forEach(o=>{ if(o&&o.id&&typeof o.why==="string") why[String(o.id)]=o.why.slice(0,80); });
-      state.aiOrder[key]={ids:sanitizeAIOrder(arr.map(o=>o&&o.id).filter(Boolean),pending.map(({t})=>t.id)),why,at:Date.now()};
+      state.aiOrder[key]={ids:sanitizeAIOrder(arr.map(o=>o&&o.id).filter(Boolean),orderable.map(({t})=>t.id)),why,at:Date.now()};
       orderOk=state.aiOrder[key].ids.length>0;
       if(!orderOk) oErr={kind:"empty",text:"AI returned an empty order. Tap Today's plan to retry."};
-    } else oErr=classifyGroqError(oRes.reason);
+    } else if(!orderSkipped) oErr=classifyGroqError(oRes.reason);
     if(sRes.status==="fulfilled"){
       const text=String(sRes.value.summary||"").trim().slice(0,600);
       if(text){ state.aiSummary[key]={text,at:Date.now()}; sumOk=true; }
@@ -2899,7 +2905,7 @@ img,svg{max-width:100%}
     if(orderOk||sumOk) saveAICache();
     if(btn) btn.disabled=false;
     renderQueue(); renderSummary();
-    if(!orderOk){
+    if(!orderOk&&!orderSkipped){
       console.warn("Today's plan: order call failed",oRes.reason);
       queueNote(`<div class="checkin-center" style="padding:12px 4px">${escapeHtml(oErr.text)}<br>Tap Today's plan to retry.</div>`);
     }
@@ -2907,7 +2913,9 @@ img,svg{max-width:100%}
       console.warn("Today's plan: summary call failed",sRes.reason);
       summaryNote(`<div class="checkin-center">${escapeHtml(sErr.text)}<br>Tap Today's plan to retry.</div>`);
     }
-    showToast(orderOk&&sumOk?"Today's plan ready":!orderOk&&!sumOk?`AI didn't respond (${oErr.kind})`:orderOk?"Order ready — summary failed":"Summary ready — order failed");
+    showToast(orderOk&&sumOk?"Today's plan ready"
+      :sumOk?(orderSkipped?"Summary ready (Extra needs no ordering)":"Summary ready — order failed")
+      :`AI didn't respond (${((!orderSkipped?oErr:sErr)||{}).kind||"error"})`);
   }
   function paintTicks(){
     const k=groqKey(), fmt=/^gsk_[A-Za-z0-9]+$/.test(k), ver=fmt&&isGroqVerified();
